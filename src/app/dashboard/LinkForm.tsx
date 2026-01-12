@@ -45,15 +45,15 @@ export default function LinkForm({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-5">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 p-6 space-y-5 transition-colors">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-800">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-white">
           {editing ? 'Edit Link' : 'Add New Link'}
         </h2>
         {editing && (
           <button
-            onClick={() => onSuccess()} // This acts as cancel in this context if we want, but for now just title
-            className="text-xs text-slate-400 hover:text-slate-600"
+            onClick={() => onSuccess()}
+            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
           >
             Cancel
           </button>
@@ -62,9 +62,9 @@ export default function LinkForm({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Application Name</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Application Name</label>
           <input
-            className="w-full border border-slate-200 p-3 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             placeholder="e.g. Grafana"
             value={title}
             onChange={e => setTitle(e.target.value)}
@@ -73,9 +73,9 @@ export default function LinkForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">URL</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">URL</label>
           <input
-            className="w-full border border-slate-200 p-3 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono text-sm"
+            className="w-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono text-sm"
             placeholder="https://..."
             value={url}
             onChange={e => setUrl(e.target.value)}
@@ -84,17 +84,17 @@ export default function LinkForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Icon URL (Optional)</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Icon URL (Optional)</label>
           <div className="flex gap-3">
             <input
-              className="flex-1 w-full border border-slate-200 p-3 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono text-sm"
+              className="flex-1 w-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono text-sm"
               placeholder="https://..."
               value={icon}
               onChange={e => setIcon(e.target.value)}
               spellCheck={false}
             />
             {icon && (
-              <div className="w-12 h-12 flex-shrink-0 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
+              <div className="w-12 h-12 flex-shrink-0 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg flex items-center justify-center overflow-hidden">
                 <img
                   src={icon}
                   alt="preview"

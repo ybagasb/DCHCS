@@ -24,25 +24,25 @@ export default function LinkList({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold text-slate-800">Your Links</h3>
-        <span className="text-sm bg-blue-50 text-blue-700 py-1 px-3 rounded-full font-medium">
+        <h3 className="text-xl font-bold text-slate-800 dark:text-white">Your Links</h3>
+        <span className="text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 py-1 px-3 rounded-full font-medium">
           {links.length} Links
         </span>
       </div>
 
       <div className="grid gap-4">
         {links.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
-            <p className="text-slate-500">No links found. Create one to get started!</p>
+          <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+            <p className="text-slate-500 dark:text-slate-400">No links found. Create one to get started!</p>
           </div>
         ) : (
           links.map(link => (
             <div
               key={link._id}
-              className="group bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              className="group bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-500/50 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             >
               <div className="flex items-center gap-4 overflow-hidden">
-                <div className="w-12 h-12 flex-shrink-0 bg-slate-50 rounded-lg flex items-center justify-center border border-slate-100 group-hover:bg-blue-50 transition-colors">
+                <div className="w-12 h-12 flex-shrink-0 bg-slate-50 dark:bg-slate-900 rounded-lg flex items-center justify-center border border-slate-100 dark:border-slate-700 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                   {link.icon ? (
                     <img
                       src={link.icon}
@@ -56,14 +56,14 @@ export default function LinkList({
                 </div>
 
                 <div className="min-w-0">
-                  <h4 className="font-semibold text-slate-800 truncate group-hover:text-blue-600 transition-colors">
+                  <h4 className="font-semibold text-slate-800 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {link.title}
                   </h4>
                   <a
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-slate-500 hover:text-blue-500 truncate block hover:underline"
+                    className="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 truncate block hover:underline"
                   >
                     {link.url}
                   </a>
@@ -73,14 +73,14 @@ export default function LinkList({
               <div className="flex items-center gap-2 self-end sm:self-auto">
                 <button
                   onClick={() => onEdit(link)}
-                  className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-white hover:text-blue-600 hover:shadow border border-transparent hover:border-slate-200 transition-all"
+                  className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-white dark:hover:bg-slate-600 hover:text-blue-600 dark:hover:text-blue-300 hover:shadow border border-transparent hover:border-slate-200 dark:hover:border-slate-500 transition-all"
                 >
                   Edit
                 </button>
 
                 <button
                   onClick={() => remove(link._id)}
-                  className="px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-white hover:shadow border border-transparent hover:border-red-100 transition-all"
+                  className="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-white dark:hover:bg-red-900/30 hover:shadow border border-transparent hover:border-red-100 dark:hover:border-red-800 transition-all"
                 >
                   Delete
                 </button>

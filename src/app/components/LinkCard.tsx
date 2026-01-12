@@ -16,12 +16,12 @@ export default function LinkCard({ title, url, icon }: LinkCardProps) {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center overflow-hidden"
+            className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center overflow-hidden"
         >
             {/* Decorative background blob */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
 
-            <div className="h-16 w-16 mb-4 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-blue-50 transition-colors duration-300">
+            <div className="h-16 w-16 mb-4 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors duration-300">
                 {icon && !imgError ? (
                     <img
                         src={icon}
@@ -34,16 +34,16 @@ export default function LinkCard({ title, url, icon }: LinkCardProps) {
                 )}
             </div>
 
-            <h3 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1 w-full">
+            <h3 className="font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1 w-full">
                 {title}
             </h3>
 
-            <p className="text-xs text-slate-400 mt-2 line-clamp-1 w-full group-hover:text-slate-500">
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 line-clamp-1 w-full group-hover:text-slate-500 dark:group-hover:text-slate-300">
                 {tryGetHostname(url)}
             </p>
 
             <div className="mt-4 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                <span className="text-xs font-semibold text-blue-600 flex items-center gap-1">
+                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                     Visit Link <span className="text-lg">→</span>
                 </span>
             </div>
