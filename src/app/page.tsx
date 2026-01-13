@@ -4,6 +4,8 @@ import Link from 'next/link'
 import LinkCard from './components/LinkCard'
 import ThemeToggle from './components/ThemeToggle'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   await connectDB()
   const links = await LinkModel.find().sort({ createdAt: -1 })
