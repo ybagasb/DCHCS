@@ -42,6 +42,9 @@ export default function LinkForm({
     )
 
     onSuccess()
+    setTitle('')
+    setUrl('')
+    setIcon('')
   }
 
   return (

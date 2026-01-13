@@ -41,7 +41,7 @@ export default function LinkList({
               key={link._id}
               className="group bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-500/50 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             >
-              <div className="flex items-center gap-4 overflow-hidden">
+              <div className="flex-1 flex items-center gap-4 min-w-0">
                 <div className="w-12 h-12 flex-shrink-0 bg-slate-50 dark:bg-slate-900 rounded-lg flex items-center justify-center border border-slate-100 dark:border-slate-700 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                   {link.icon ? (
                     <img
@@ -56,17 +56,20 @@ export default function LinkList({
                 </div>
 
                 <div className="min-w-0">
-                  <h4 className="font-semibold text-slate-800 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <h4 className="font-semibold text-slate-800 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors w-full">
                     {link.title}
                   </h4>
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 truncate block hover:underline"
-                  >
-                    {link.url}
-                  </a>
+                  <div className="w-full">
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 truncate block hover:underline"
+                        title={link.url}
+                      >
+                        {link.url.length > 50 ? `${link.url.substring(0, 50)}...` : link.url}
+                      </a>
+                  </div>
                 </div>
               </div>
 
