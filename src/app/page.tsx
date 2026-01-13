@@ -3,12 +3,30 @@ import { Link as LinkModel } from '@/models/Link'
 import Link from 'next/link'
 import LinkCard from './components/LinkCard'
 import ThemeToggle from './components/ThemeToggle'
+import SearchAndSort from './components/SearchAndSort'
 
 export const dynamic = 'force-dynamic'
 
-export default async function HomePage() {
+export default async function HomePage(props: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   await connectDB()
-  const links = await LinkModel.find().sort({ createdAt: -1 })
+  
+  const searchParams = await props.searchParams
+  const q = typeof searchParams.q === 'string' ? searchParams.q : ''
+  const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'latest'
+
+  let sortQuery: any = { createdAt: -1 }
+  if (sort === 'oldest') sortQuery = { createdAt: 1 }
+  if (sort === 'asc') sortQuery = { title: 1 }
+  if (sort === 'desc') sortQuery = { title: -1 }
+
+  const query: any = {}
+  if (q) {
+    query.title = { $regex: q, $options: 'i' }
+  }
+
+  const links = await LinkModel.find(query).sort(sortQuery)
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
@@ -38,16 +56,32 @@ export default async function HomePage() {
 
       {/* Content */}
       <section className="max-w-7xl mx-auto px-6 pb-20 pt-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {links.map((link: any) => (
-            <LinkCard
-              key={link._id}
-              title={link.title}
-              url={link.url}
-              icon={link.icon}
-            />
-          ))}
-        </div>
+        <SearchAndSort />
+        
+        {links.length === 0 ? (
+           <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+               <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+               </svg>
+            </div>
+             <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">No links found</h3>
+             <p className="text-slate-500 dark:text-slate-400 mt-1">
+               Try adjusting your search or filter to find what you're looking for.
+             </p>
+           </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {links.map((link: any) => (
+              <LinkCard
+                key={link._id}
+                title={link.title}
+                url={link.url}
+                icon={link.icon}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </main>
   )

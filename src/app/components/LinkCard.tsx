@@ -34,7 +34,7 @@ export default function LinkCard({ title, url, icon }: LinkCardProps) {
                 )}
             </div>
 
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1 w-full">
+            <h3 className="font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors w-full break-words leading-tight px-1">
                 {title}
             </h3>
 
