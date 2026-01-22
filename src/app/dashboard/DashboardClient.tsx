@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import LinkForm from './LinkForm'
 import LinkList from './LinkList'
-import ThemeToggle from '../components/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 export type LinkType = {
   _id: string
@@ -31,39 +31,18 @@ export default function DashboardClient() {
     return () => clearTimeout(delayDebounceFn)
   }, [search])
 
-  const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    window.location.href = '/login'
-  }
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-              DashboardLink
-            </h1>
-            <div className="flex items-center gap-4">
-                <ThemeToggle />
-                <button
-                onClick={logout}
-                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                >
-                Sign Out
-                </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 overflow-x-hidden">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white">Dashboard</h2>
+            <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white">DashboardLinks</h2>
             <p className="text-slate-500 dark:text-slate-400 mt-1">Manage your links efficiently.</p>
           </div>
           

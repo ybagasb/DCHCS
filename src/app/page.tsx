@@ -32,23 +32,28 @@ export default async function HomePage(props: {
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
       {/* Navbar */}
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-white/20 dark:border-slate-800/50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/20">
-              D
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex justify-between items-center">
+          <div className="flex items-center gap-1.5 md:gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-yellow-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/20">
+                <img 
+                  src="https://www.brantas-abipraya.co.id/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png" 
+                  alt="Logo Brantas Abipraya"
+                  className="w-6 h-6 object-contain"
+                />
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
-              DashboardLink
+            <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+              DCHCS
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
              <ThemeToggle />
             <Link
                 href="/login"
-                className="px-5 py-2.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-100 hover:shadow-lg transition-all active:scale-95"
+                className="px-3 py-2 md:px-5 md:py-2.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs md:text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-100 hover:shadow-lg transition-all active:scale-95"
             >
-                Dashboard Login
+                <span className="md:hidden">Login</span>
+                <span className="hidden md:inline">Dashboard Login</span>
             </Link>
           </div>
         </div>

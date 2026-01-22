@@ -35,11 +35,15 @@ export default function LoginPage() {
       <div className="bg-white dark:bg-slate-800 max-w-md w-full rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden transition-colors">
         {/* Header */}
         <div className="px-8 pt-8 pb-6 text-center">
-            <div className="w-12 h-12 mx-auto bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl mb-4 shadow-lg shadow-blue-500/20">
-              D
+            <div className="w-25 h-25 mx-auto bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
+              <img 
+                  src="https://www.brantas-abipraya.co.id/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png" 
+                  alt="Logo Brantas Abipraya"
+                  className="w-20 h-20 object-contain"
+                />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Welcome Back</h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">Sign in to manage your link dashboard</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">Sign in to manage your DCHCS</p>
         </div>
 
         {/* Form */}

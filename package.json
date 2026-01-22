@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "cookie": "^1.1.1",
+    "framer-motion": "^12.27.5",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.562.0",
     "mongoose": "^9.1.3",
