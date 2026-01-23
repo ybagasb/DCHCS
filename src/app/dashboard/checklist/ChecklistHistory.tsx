@@ -10,6 +10,13 @@ type ChecklistItem = {
   ups: { ups1: string; ups2: string }
   fss: { lcdPanel: string; selenoid: string }
   ems: { tempRoom1: string; tempRoom2: string }
+  raisedFloor?: {
+    physicalCondition: string
+    cleanliness: string
+    airflowCooling: string
+    notes: string
+    status: string
+  }
   rackCabling: { rack: string; cabling: string }
   acSplitLights: { acSplit: string; lights: string }
   cctvDc: string
@@ -50,6 +57,7 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
             <th className="px-6 py-3 whitespace-nowrap">UPS</th>
             <th className="px-6 py-3 whitespace-nowrap">FSS</th>
             <th className="px-6 py-3 whitespace-nowrap">EMS (R1/R2)</th>
+            <th className="px-6 py-3 whitespace-nowrap">Raised Floor</th>
             <th className="px-6 py-3 whitespace-nowrap">Infra</th>
             <th className="px-6 py-3 whitespace-nowrap">CCTV</th>
             <th className="px-6 py-3 whitespace-nowrap">Notes</th>
@@ -83,6 +91,20 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
               <td className="px-6 py-4">
                 <div>1: {item.ems.tempRoom1}°C</div>
                 <div>2: {item.ems.tempRoom2}°C</div>
+              </td>
+              <td className="px-6 py-4">
+                {item.raisedFloor ? (
+                    <>
+                        <div className={`font-medium ${item.raisedFloor.status === 'Critical' ? 'text-red-500' : item.raisedFloor.status === 'Issue' ? 'text-yellow-500' : 'text-green-500'}`}>
+                            {item.raisedFloor.status || '-'}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                            Cond: {item.raisedFloor.physicalCondition || '-'}
+                        </div>
+                    </>
+                ) : (
+                    <span className="text-slate-400">-</span>
+                )}
               </td>
               <td className="px-6 py-4">
                 <div>Rack: {item.rackCabling.rack}</div>

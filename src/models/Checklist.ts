@@ -5,8 +5,8 @@ const ChecklistSchema = new Schema(
     tgl: { type: Date, required: true },
     piket: { type: String, default: '' },
     pac: {
-      temp: { type: String, default: '' },
-      humdty: { type: String, default: '' },
+      temp: { type: Number, required: true },
+      humdty: { type: Number, required: true },
       alarm: { type: String, default: '' },
     },
     ups: {
@@ -18,8 +18,15 @@ const ChecklistSchema = new Schema(
       selenoid: { type: String, default: '' },
     },
     ems: {
-      tempRoom1: { type: String, default: '' },
-      tempRoom2: { type: String, default: '' },
+      tempRoom1: { type: Number, required: true },
+      tempRoom2: { type: Number, required: true },
+    },
+    raisedFloor: {
+      physicalCondition: { type: String, default: '' },
+      cleanliness: { type: String, default: '' },
+      airflowCooling: { type: String, default: '' },
+      notes: { type: String, default: '' },
+      status: { type: String, default: '' },
     },
     rackCabling: {
       rack: { type: String, default: '' },
@@ -34,5 +41,12 @@ const ChecklistSchema = new Schema(
   },
   { timestamps: true }
 )
+
+// Prevent Mongoose model recompilation error in development
+// But force refresh if schema changed (hacky for dev, but effective)
+// In a real prod app, you'd rely on build process, but for HMR we need this:
+if (process.env.NODE_ENV !== 'production') {
+  delete models.Checklist
+}
 
 export const Checklist = models.Checklist || model('Checklist', ChecklistSchema)

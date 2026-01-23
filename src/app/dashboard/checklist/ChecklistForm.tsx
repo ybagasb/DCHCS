@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, ChevronLeft, Save } from 'lucide-react'
 
@@ -19,27 +19,41 @@ const InputField = ({
   onChange,
   error,
   type = 'text',
+  readOnly = false,
+  suffix,
 }: {
   label: string
   value: string
   onChange: (val: string) => void
   error?: boolean
   type?: string
+  readOnly?: boolean
+  suffix?: string
 }) => (
   <div className="flex flex-col gap-2">
     <label className={`text-sm font-semibold ${error ? 'text-red-500' : 'text-slate-600 dark:text-slate-300'}`}>
       {label}
     </label>
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border rounded-lg focus:outline-none focus:ring-2 disabled:opacity-50 transition-all ${
-        error
-          ? 'border-red-500 focus:ring-red-200'
-          : 'border-slate-300 dark:border-slate-600 focus:ring-blue-500 focus:border-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400'
-      }`}
-    />
+    <div className="relative">
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        readOnly={readOnly}
+        className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border rounded-lg focus:outline-none focus:ring-2 disabled:opacity-50 transition-all ${
+          readOnly ? 'cursor-not-allowed opacity-70 bg-slate-100 dark:bg-slate-800' : ''
+        } ${
+          error
+            ? 'border-red-500 focus:ring-red-200'
+            : 'border-slate-300 dark:border-slate-600 focus:ring-blue-500 focus:border-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400'
+        } ${suffix ? 'pr-10' : ''}`}
+      />
+      {suffix && (
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500 dark:text-slate-400">
+          {suffix}
+        </div>
+      )}
+    </div>
     {error && <span className="text-xs text-red-500">This field is required</span>}
   </div>
 )
@@ -94,7 +108,9 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
   const [errors, setErrors] = useState<Record<string, boolean>>({}) // Track errors by field key
-  const totalSteps = 6
+  const totalSteps = 7
+
+  const [loadingPic, setLoadingPic] = useState(false)
 
   const [formData, setFormData] = useState({
     tgl: new Date().toISOString().split('T')[0],
@@ -103,11 +119,52 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
     ups: { ups1: '', ups2: '' },
     fss: { lcdPanel: '', selenoid: '' },
     ems: { tempRoom1: '', tempRoom2: '' },
+    raisedFloor: { 
+      physicalCondition: '', 
+      cleanliness: '', 
+      airflowCooling: '', 
+      notes: 'No issue found', 
+      status: '' 
+    },
     rackCabling: { rack: '', cabling: '' },
     acSplitLights: { acSplit: '', lights: '' },
     cctvDc: '',
     noted: '',
   })
+  
+  // Fetch PIC schedule when date changes
+  useEffect(() => { // eslint-disable-next-line
+    const fetchPic = async () => {
+      if (!formData.tgl) return
+      
+      setLoadingPic(true)
+      try {
+        const res = await fetch(`/api/pic-schedule?date=${formData.tgl}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.piket) {
+            setFormData(prev => ({ ...prev, piket: data.piket }))
+            // Clear error if it existed
+            if (errors['piket']) {
+              setErrors(prev => ({ ...prev, piket: false }))
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch PIC schedule', error)
+      } finally {
+        setLoadingPic(false)
+      }
+    }
+
+    const timer = setTimeout(() => {
+        fetchPic()
+    }, 500) // Debounce slightly to avoid rapid requests on manual typing if it were a text field (though here it's date picker)
+
+    return () => clearTimeout(timer)
+  }, [formData.tgl])
+
+
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (section: string, field: string, value: string) => {
@@ -123,7 +180,12 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
       setFormData((prev) => ({
         ...prev,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        [section]: { ...(prev as any)[section], [field]: value },
+        [section]: { 
+            ...(prev as any)[section], 
+            [field]: (field === 'temp' || field === 'humdty' || field === 'tempRoom1' || field === 'tempRoom2') 
+                ? Number(value) 
+                : value 
+        },
       }))
     }
   }
@@ -149,6 +211,11 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
       if (!formData.ems.tempRoom1) newErrors['ems.tempRoom1'] = true
       if (!formData.ems.tempRoom2) newErrors['ems.tempRoom2'] = true
     } else if (currentStep === 6) {
+      if (!formData.raisedFloor.physicalCondition) newErrors['raisedFloor.physicalCondition'] = true
+      if (!formData.raisedFloor.cleanliness) newErrors['raisedFloor.cleanliness'] = true
+      if (!formData.raisedFloor.airflowCooling) newErrors['raisedFloor.airflowCooling'] = true
+      if (!formData.raisedFloor.status) newErrors['raisedFloor.status'] = true
+    } else if (currentStep === 7) {
       if (!formData.rackCabling.rack) newErrors['rackCabling.rack'] = true
       if (!formData.rackCabling.cabling) newErrors['rackCabling.cabling'] = true
       if (!formData.acSplitLights.acSplit) newErrors['acSplitLights.acSplit'] = true
@@ -201,6 +268,13 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
         ups: { ups1: '', ups2: '' },
         fss: { lcdPanel: '', selenoid: '' },
         ems: { tempRoom1: '', tempRoom2: '' },
+        raisedFloor: { 
+          physicalCondition: '', 
+          cleanliness: '', 
+          airflowCooling: '', 
+          notes: '', 
+          status: '' 
+        },
         rackCabling: { rack: '', cabling: '' },
         acSplitLights: { acSplit: '', lights: '' },
         cctvDc: '',
@@ -228,19 +302,41 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
               onChange={(v) => handleChange('root', 'tgl', v)}
               error={errors['tgl']}
             />
-            <InputField
-              label="Officer On Duty (Piket)"
-              value={formData.piket}
-              onChange={(v) => handleChange('root', 'piket', v)}
-              error={errors['piket']}
-            />
+            <div className="relative">
+              <InputField
+                label="Officer On Duty (Piket)"
+                value={formData.piket}
+                onChange={(v) => handleChange('root', 'piket', v)}
+                error={errors['piket']}
+                readOnly
+              />
+              {loadingPic && (
+                <div className="absolute right-3 top-9">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                </div>
+              )}
+            </div>
           </InputGroup>
         )
       case 2:
         return (
           <InputGroup label="PAC System">
-            <InputField label="Temperature" value={formData.pac.temp} onChange={(v) => handleChange('pac', 'temp', v)} error={errors['pac.temp']} />
-            <InputField label="Humidity" value={formData.pac.humdty} onChange={(v) => handleChange('pac', 'humdty', v)} error={errors['pac.humdty']} />
+            <InputField 
+                label="Temperature" 
+                value={formData.pac.temp} 
+                onChange={(v) => handleChange('pac', 'temp', v)} 
+                error={errors['pac.temp']} 
+                type="number"
+                suffix="°C"
+            />
+            <InputField 
+                label="Humidity" 
+                value={formData.pac.humdty} 
+                onChange={(v) => handleChange('pac', 'humdty', v)} 
+                error={errors['pac.humdty']} 
+                type="number"
+                suffix="%"
+            />
             <SelectField
               label="Alarm Status"
               value={formData.pac.alarm}
@@ -291,12 +387,71 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
       case 5:
         return (
           <InputGroup label="Environment Monitoring System (EMS)">
-            <InputField label="Temp Room 1" value={formData.ems.tempRoom1} onChange={(v) => handleChange('ems', 'tempRoom1', v)} error={errors['ems.tempRoom1']} />
-            <InputField label="Temp Room 2" value={formData.ems.tempRoom2} onChange={(v) => handleChange('ems', 'tempRoom2', v)} error={errors['ems.tempRoom2']} />
+            <InputField 
+                label="Temp Room 1" 
+                value={formData.ems.tempRoom1} 
+                onChange={(v) => handleChange('ems', 'tempRoom1', v)} 
+                error={errors['ems.tempRoom1']} 
+                type="number"
+                suffix="°C"
+            />
+            <InputField 
+                label="Temp Room 2" 
+                value={formData.ems.tempRoom2} 
+                onChange={(v) => handleChange('ems', 'tempRoom2', v)} 
+                error={errors['ems.tempRoom2']} 
+                type="number"
+                suffix="°C"
+            />
           </InputGroup>
         )
       case 6:
         return (
+          <InputGroup label="Raised Floor">
+            <SelectField
+              label="Physical Condition"
+              value={formData.raisedFloor.physicalCondition}
+              onChange={(v) => handleChange('raisedFloor', 'physicalCondition', v)}
+              options={['Good', 'Bad', 'Damaged']}
+              error={errors['raisedFloor.physicalCondition']}
+            />
+            <SelectField
+              label="Cleanliness"
+              value={formData.raisedFloor.cleanliness}
+              onChange={(v) => handleChange('raisedFloor', 'cleanliness', v)}
+              options={['Clean', 'Dirty', 'Dusty']}
+              error={errors['raisedFloor.cleanliness']}
+            />
+            <SelectField
+              label="Airflow & Cooling"
+              value={formData.raisedFloor.airflowCooling}
+              onChange={(v) => handleChange('raisedFloor', 'airflowCooling', v)}
+              options={['Normal', 'Blocked', 'Weak']}
+              error={errors['raisedFloor.airflowCooling']}
+            />
+            <SelectField
+              label="Overall Status"
+              value={formData.raisedFloor.status}
+              onChange={(v) => handleChange('raisedFloor', 'status', v)}
+              options={['OK', 'Issue', 'Critical']}
+              error={errors['raisedFloor.status']}
+            />
+            <div className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-3">
+                <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2 block">
+                    Notes
+                </label>
+                <input
+                    type="text"
+                    value={formData.raisedFloor.notes}
+                    onChange={(e) => handleChange('raisedFloor', 'notes', e.target.value)}
+                    className="w-full bg-transparent focus:outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400"
+                    placeholder="e.g. No issue found"
+                />
+            </div>
+          </InputGroup>
+        )
+      case 7:
+          return (
           <div className="space-y-6">
             <InputGroup label="Infrastructure">
               <SelectField

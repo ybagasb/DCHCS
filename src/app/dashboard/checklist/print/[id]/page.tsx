@@ -196,6 +196,43 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                             {evaluateStatus(item.ems?.tempRoom2, 'lessThan', 25).text}
                         </td>
                     </tr>
+                    
+                    {/* Raised Floor */}
+                    <tr>
+                        <td className="border border-black px-3 py-1 font-bold" rowSpan={4}>Raised Floor</td>
+                        <td className="border border-black px-3 py-1">Physical Cond.</td>
+                        <td className="border border-black px-3 py-1 text-center">{item.raisedFloor?.physicalCondition || '-'}</td>
+                        <td className="border border-black px-3 py-1 text-center text-slate-500">Good</td>
+                        <td className={`border border-black px-3 py-1 text-center ${evaluateStatus(item.raisedFloor?.physicalCondition, 'equal', 'Good').color}`}>
+                            {evaluateStatus(item.raisedFloor?.physicalCondition, 'equal', 'Good').text}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td className="border border-black px-3 py-1">Cleanliness</td>
+                        <td className="border border-black px-3 py-1 text-center">{item.raisedFloor?.cleanliness || '-'}</td>
+                        <td className="border border-black px-3 py-1 text-center text-slate-500">Clean</td>
+                        <td className={`border border-black px-3 py-1 text-center ${evaluateStatus(item.raisedFloor?.cleanliness, 'equal', 'Clean').color}`}>
+                            {evaluateStatus(item.raisedFloor?.cleanliness, 'equal', 'Clean').text}
+                        </td>
+                    </tr>
+                    <tr>
+                         <td className="border border-black px-3 py-1">Airflow</td>
+                        <td className="border border-black px-3 py-1 text-center">{item.raisedFloor?.airflowCooling || '-'}</td>
+                        <td className="border border-black px-3 py-1 text-center text-slate-500">Normal</td>
+                        <td className={`border border-black px-3 py-1 text-center ${evaluateStatus(item.raisedFloor?.airflowCooling, 'equal', 'Normal').color}`}>
+                            {evaluateStatus(item.raisedFloor?.airflowCooling, 'equal', 'Normal').text}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td className="border border-black px-3 py-1">Overall Status</td>
+                        <td className={`border border-black px-3 py-1 text-center font-bold ${item.raisedFloor?.status === 'OK' ? '' : 'text-red-600 print:text-black'}`}>
+                            {item.raisedFloor?.status || '-'}
+                        </td>
+                        <td className="border border-black px-3 py-1 text-center text-slate-500">OK</td>
+                        <td className={`border border-black px-3 py-1 text-center ${evaluateStatus(item.raisedFloor?.status, 'equal', 'OK').color}`}>
+                             {evaluateStatus(item.raisedFloor?.status, 'equal', 'OK').text}
+                        </td>
+                    </tr>
 
                     {/* Infrastructure */}
                     <tr>
@@ -246,7 +283,10 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
         {/* Notes */}
         <div className="mt-6 border border-black p-4 min-h-[100px]">
              <h3 className="font-bold underline mb-2">Catatan Tambahan:</h3>
-             <p className="whitespace-pre-wrap">{item.noted || 'Nihil'}</p>
+             <p className="whitespace-pre-wrap">
+                 {item.noted || ''}
+                 {item.raisedFloor?.notes && item.raisedFloor.notes !== 'No issue found' ? `\n\n[Raised Floor]: ${item.raisedFloor.notes}` : ''}
+             </p>
         </div>
 
         {/* Signatures */}
