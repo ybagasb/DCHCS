@@ -108,7 +108,7 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
   const [errors, setErrors] = useState<Record<string, boolean>>({}) // Track errors by field key
-  const totalSteps = 7
+  const totalSteps = 8
 
   const [loadingPic, setLoadingPic] = useState(false)
 
@@ -221,6 +221,7 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
       if (!formData.acSplitLights.acSplit) newErrors['acSplitLights.acSplit'] = true
       if (!formData.acSplitLights.lights) newErrors['acSplitLights.lights'] = true
       if (!formData.cctvDc) newErrors['cctvDc'] = true
+    } else if (currentStep === 8) {
       // 'noted' is optional
     }
 
@@ -234,6 +235,7 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
 
   const handleNext = () => {
     if (validateStep(step)) {
+      setErrors({})
       setStep((s) => Math.min(s + 1, totalSteps))
       window.scrollTo(0, 0)
     }
@@ -288,7 +290,10 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
     }
   }
 
-  const prevStep = () => setStep((s) => Math.max(s - 1, 1))
+  const prevStep = () => {
+    setErrors({})
+    setStep((s) => Math.max(s - 1, 1))
+  }
 
   const renderStep = () => {
     switch (step) {
@@ -490,19 +495,24 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
                 error={errors['cctvDc']}
               />
             </InputGroup>
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+          </div>
+        )
+      case 8:
+        return (
+          <InputGroup label="Additional Information">
+            <div className="bg-white dark:bg-slate-800 p-1 rounded-xl">
                 <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2 block">
-                    Additional Notes
+                    Notes / Keterangan Tambahan
                 </label>
                 <textarea
-                    rows={3}
+                    rows={4}
                     value={formData.noted}
                     onChange={(e) => handleChange('root', 'noted', e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all resize-none"
-                    placeholder="Any observations or issues..."
+                    placeholder="Tuliskan catatan tambahan jika ada..."
                 />
             </div>
-          </div>
+          </InputGroup>
         )
     }
   }

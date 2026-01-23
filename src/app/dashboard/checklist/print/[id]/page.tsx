@@ -290,7 +290,7 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
         </div>
 
         {/* Signatures */}
-        <div className="mt-12 flex justify-end">
+        <div className="mt-5 flex justify-end">
             <div className="mr-12 text-center">
                 <p className="mb-20">Mengetahui,</p>
                 <div className="border-b border-black w-40 mx-auto"></div>
