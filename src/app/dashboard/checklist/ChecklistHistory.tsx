@@ -94,16 +94,29 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
               </td>
               <td className="px-6 py-4">
                 {item.raisedFloor ? (
-                    <>
-                        <div className={`font-medium ${item.raisedFloor.status === 'Critical' ? 'text-red-500' : item.raisedFloor.status === 'Issue' ? 'text-yellow-500' : 'text-green-500'}`}>
-                            {item.raisedFloor.status || '-'}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                       <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                          item.raisedFloor.status === 'Critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 
+                          item.raisedFloor.status === 'Issue' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 
+                          'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                       }`}>
+                          {item.raisedFloor.status || 'OK'}
+                       </span>
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 grid grid-cols-2 gap-x-2">
+                        <span>Phys: {item.raisedFloor.physicalCondition || '-'}</span>
+                        <span>Clean: {item.raisedFloor.cleanliness || '-'}</span>
+                        <span>Air: {item.raisedFloor.airflowCooling || '-'}</span>
+                    </div>
+                    {item.raisedFloor.notes && item.raisedFloor.notes !== 'No issue found' && (
+                        <div className="text-xs italic text-slate-600 dark:text-slate-300 mt-1 border-t border-slate-100 dark:border-slate-700 pt-1">
+                            "{item.raisedFloor.notes}"
                         </div>
-                        <div className="text-xs text-slate-500">
-                            Cond: {item.raisedFloor.physicalCondition || '-'}
-                        </div>
-                    </>
+                    )}
+                  </div>
                 ) : (
-                    <span className="text-slate-400">-</span>
+                  <span className="text-slate-400">-</span>
                 )}
               </td>
               <td className="px-6 py-4">
@@ -113,8 +126,11 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
                 <div>Light: {item.acSplitLights.lights}</div>
               </td>
               <td className="px-6 py-4">{item.cctvDc}</td>
-              <td className="px-6 py-4 max-w-xs truncate" title={item.noted}>
-                {item.noted || '-'}
+              <td className="px-6 py-4 max-w-xs text-xs">
+                <div className="space-y-1">
+                    {item.noted && <div title={item.noted}>{item.noted}</div>}
+                    {!item.noted && !item.raisedFloor?.notes && <span className="text-slate-400">-</span>}
+                </div>
               </td>
               <td className="px-6 py-4 text-center">
                 <a

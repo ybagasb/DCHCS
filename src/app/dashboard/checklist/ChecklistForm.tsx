@@ -106,11 +106,13 @@ const SelectField = ({
 
 export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void }) {
   const [loading, setLoading] = useState(false)
+  const [loadingPic, setLoadingPic] = useState(false)
   const [step, setStep] = useState(1)
   const [errors, setErrors] = useState<Record<string, boolean>>({}) // Track errors by field key
   const totalSteps = 8
-
-  const [loadingPic, setLoadingPic] = useState(false)
+  
+  // Transition lock state to prevent double-click submissions
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   const [formData, setFormData] = useState({
     tgl: new Date().toISOString().split('T')[0],
@@ -234,22 +236,38 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
   }
 
   const handleNext = () => {
+    if (isTransitioning) return // Lock navigation
     if (validateStep(step)) {
       setErrors({})
+      setIsTransitioning(true) // Engage lock
       setStep((s) => Math.min(s + 1, totalSteps))
       window.scrollTo(0, 0)
+      setTimeout(() => setIsTransitioning(false), 500) // Release after 0.5s sequence
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isTransitioning) return // Prevent if locked
+
+    console.log('handleSubmit called', { step, totalSteps })
     
-    // Validate final step before submitting
+    // If not last step, explicitly treat as Next and STOP
+    if (step < totalSteps) {
+        console.log('Not last step, redirecting to handleNext')
+        handleNext()
+        return
+    }
+    
     if (!validateStep(step)) return
 
-    // Confirmation dialog
-    if (!confirm('Are you certain you want to verify and submit this checklist data?')) {
-      return
+    // Confirmation dialog - DOUBLE CHECK step
+    if (step === totalSteps) {
+        if (!confirm('Confirmation: Save monthly checklist data?')) {
+          return
+        }
+    } else {
+        return // Should never reach here due to first check, but safety first
     }
 
     setLoading(true)
@@ -291,8 +309,11 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
   }
 
   const prevStep = () => {
+    if (isTransitioning) return // Lock navigation
     setErrors({})
+    setIsTransitioning(true)
     setStep((s) => Math.max(s - 1, 1))
+    setTimeout(() => setIsTransitioning(false), 500)
   }
 
   const renderStep = () => {
@@ -551,9 +572,9 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
         <button
           type="button"
           onClick={prevStep}
-          disabled={step === 1}
+          disabled={step === 1 || isTransitioning}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-colors ${
-            step === 1
+            step === 1 || isTransitioning
               ? 'text-slate-300 cursor-not-allowed hidden'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
@@ -566,7 +587,8 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
           <button
             type="button"
             onClick={handleNext}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all"
+            disabled={isTransitioning}
+            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-50"
           >
             Next
             <ChevronRight className="w-4 h-4" />
@@ -574,7 +596,7 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
         ) : (
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || isTransitioning}
             className="flex items-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (

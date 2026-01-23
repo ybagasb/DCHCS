@@ -30,6 +30,12 @@ export default function Navbar() {
               >
                 Checklist
               </Link>
+              <Link
+                href="/dashboard/checklist/report"
+                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors whitespace-nowrap"
+              >
+                Report
+              </Link>
             </div>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
