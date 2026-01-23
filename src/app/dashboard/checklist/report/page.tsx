@@ -106,11 +106,10 @@ export default function MonthlyReportPage() {
           </select>
 
           <button
-            onClick={() => handlePrint && handlePrint()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+            onClick={() => window.print()}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-md"
           >
-            <Printer className="w-4 h-4" />
-            Print Report
+            🖨️ Print Document
           </button>
         </div>
       </div>
