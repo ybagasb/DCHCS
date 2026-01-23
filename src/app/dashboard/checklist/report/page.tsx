@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useReactToPrint } from 'react-to-print'
 import { FileText, Printer, Loader2, ArrowLeft } from 'lucide-react'
+import { div } from 'framer-motion/client'
 
 interface ChecklistItem {
   _id: string
@@ -105,12 +106,14 @@ export default function MonthlyReportPage() {
             ))}
           </select>
 
-          <button
-            onClick={() => window.print()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-md"
+          <Link
+            href={`/dashboard/checklist/print/monthly?month=${month}&year=${year}`}
+            target="_blank"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-md flex items-center gap-2"
           >
-            🖨️ Print Document
-          </button>
+            <Printer className="w-4 h-4" />
+            Print Preview
+          </Link>
         </div>
       </div>
 
