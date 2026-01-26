@@ -127,7 +127,8 @@ export default async function MonthlyPrintPage(props: {
                          <tr key={item._id} className="text-center hover:bg-gray-50 print:hover:bg-transparent">
                             <td className="border border-black p-1">{new Date(item.tgl).getDate()}</td>
                             <td className="border border-black p-1 whitespace-nowrap overflow-hidden max-w-[60px] text-left px-2" title={item.piket}>
-                                {item.piket?.split(',')[0]}
+                                {item.piket?.split(',')[0]} &
+                                {item.piket?.split(',')[1]}
                             </td>
                             
                             {/* PAC */}
