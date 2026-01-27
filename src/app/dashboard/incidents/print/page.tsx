@@ -120,7 +120,7 @@ export default function IncidentPrintPage() {
                         </div>
                         <div className="flex">
                             <span className="font-semibold w-30">Tanggal Edisi</span>
-                            <span>: 8 Januari 2024</span>
+                            <span>: 8 Januari 2026</span>
                         </div>
                     </div>
                 </div>
