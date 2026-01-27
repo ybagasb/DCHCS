@@ -21,13 +21,17 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
+# Provide a dummy MONGODB_URI for the build process as it is required by the code evaluation
+ARG MONGODB_URI=mongodb://localhost:27017/alerting
+ENV MONGODB_URI=${MONGODB_URI}
+
 RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -49,8 +53,8 @@ USER nextjs
 
 EXPOSE 3001
 
-ENV PORT 3001
+ENV PORT=3001
 # set hostname to localhost
-ENV HOSTNAME "0.0.0.0"
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
