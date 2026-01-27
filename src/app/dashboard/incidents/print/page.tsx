@@ -21,14 +21,16 @@ type Incident = {
 
 export default function IncidentPrintPage() {
     const [incidents, setIncidents] = useState<Incident[]>([])
+    const [currentDate, setCurrentDate] = useState('')
 
     useEffect(() => {
         fetch('/api/incidents')
             .then(res => res.json())
             .then(data => {
                 setIncidents(data)
-                // Auto print after loading? maybe not.
             })
+
+        setCurrentDate(new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }))
     }, [])
 
     const formatDate = (dateStr?: string) => {
@@ -41,7 +43,8 @@ export default function IncidentPrintPage() {
 
     return (
         <div className="bg-white text-black min-h-screen p-4 text-[10px] sm:text-xs print:p-0">
-            <style jsx global>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
         @media print {
             @page {
                 size: landscape;
@@ -54,7 +57,7 @@ export default function IncidentPrintPage() {
                 display: none !important;
             }
         }
-      `}</style>
+      `}} />
 
             {/* Controls */}
             <div className="mb-4 no-print flex gap-4">
@@ -72,6 +75,14 @@ export default function IncidentPrintPage() {
                 </button>
             </div>
 
+            {/* Top Right Doc Info (Visible in Print) */}
+            <div className="flex justify-end text-[10px] sm:text-xs mb-2">
+                <div className="text-right">
+                    <p>Form No: F08-01</p>
+                    <p>Klasifikasi: Terbatas</p>
+                </div>
+            </div>
+
             {/* Header */}
             <div className="border border-black mb-1">
                 <div className="grid grid-cols-12 divide-x divide-black">
@@ -79,18 +90,18 @@ export default function IncidentPrintPage() {
                     <div className="col-span-2 flex items-center justify-center p-2">
                         <div className="w-20 h-20 flex items-center justify-center">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img 
-                            src="https://www.brantas-abipraya.co.id/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png" 
-                            alt="Logo Brantas Abipraya"
-                            className="w-full h-full object-contain"
+                            <img
+                                src="https://www.brantas-abipraya.co.id/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png"
+                                alt="Logo Brantas Abipraya"
+                                className="w-full h-full object-contain"
                             />
                         </div>
                     </div>
 
                     {/* Title Section */}
                     <div className="col-span-7 flex flex-col justify-center text-center p-2">
-                        <h1 className="font-bold text-sm">UNIT KERJA INOVASI DAN TRANSFORMASI DIGITAL</h1>
-                        <h2 className="font-bold text-sm">DEPARTEMEN PENGEMBANGAN BISNIS DAN MANAJEMEN RISIKO</h2>
+                        <h1 className="font-bold text-sm">UNIT KERJA IT DAN TRANSFORMASI DIGITAL</h1>
+                        <h2 className="font-bold text-sm">DEPARTEMEN QHSSE</h2>
                         <h3 className="font-bold text-sm">PT. BRANTAS ABIPRAYA (PERSERO)</h3>
                         <div className="mt-4 border-t border-black w-full pt-1">
                             <h1 className="font-bold text-lg">FORM PENGELOLAAN INSIDEN TI</h1>
@@ -99,14 +110,17 @@ export default function IncidentPrintPage() {
 
                     {/* Doc Info */}
                     <div className="col-span-3 text-[10px] p-2 space-y-1">
-                        <div className="grid grid-cols-2">
-                            <span className="font-semibold">No. Dokumen: </span>
+                        <div className="flex">
+                            <span className="font-semibold w-30">No. Dokumen</span>
+                            <span>: </span>
                         </div>
-                        <div className="grid grid-cols-2">
-                            <span className="font-semibold">Klasifikasi Dokumen:</span>
+                        <div className="flex">
+                            <span className="font-semibold w-30">Klasifikasi Dokumen</span>
+                            <span>: Internal</span>
                         </div>
-                        <div className="grid grid-cols-2">
-                            <span className="font-semibold">Tanggal Edisi:</span>
+                        <div className="flex">
+                            <span className="font-semibold w-30">Tanggal Edisi</span>
+                            <span>: 8 Januari 2024</span>
                         </div>
                     </div>
                 </div>
@@ -168,12 +182,12 @@ export default function IncidentPrintPage() {
             <div className="mt-8 grid grid-cols-12 gap-4">
                 <div className="col-span-4 text-left space-y-8">
                     <div>
-                        <p>Jakarta, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                        <p>Jakarta, {currentDate}</p>
                         <p>Disiapkan Oleh :</p>
                         <p className="font-bold">Fungsi Operasional TI</p>
                     </div>
                     <div className="mt-12">
-                        <p className="underline font-bold">( {incidents[0]?.pic || '.........................'} )</p>
+                        <p className="underline font-bold"> ......................... </p>
                         {/* We might want a specific user here, but using PIC or blank is safe */}
                         <p>NIP : .........................</p>
                     </div>
@@ -185,14 +199,14 @@ export default function IncidentPrintPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-8 text-center">
                         <div>
-                            <p className="mb-16">AVP Inovasi & Transformasi Digital</p>
-                            <p className="font-bold underline">( Ivan Dinata )</p>
-                            <p className="text-left ml-4">NIP :</p>
+                            <p className="mb-16">AVP IT & Transformasi Digital</p>
+                            <p className="font-bold underline"> .........................</p>
+                            <p className="text-left ml-29">NIP :</p>
                         </div>
                         <div>
-                            <p className="mb-16">VP Inovasi & Transformasi Digital</p>
-                            <p className="font-bold underline">( Ahmad Sabig Eko Saputra )</p>
-                            <p className="text-left ml-4">NIP :</p>
+                            <p className="mb-16">VP IT & Transformasi Digital</p>
+                            <p className="font-bold underline"> ......................... </p>
+                            <p className="text-left ml-29">NIP :</p>
                         </div>
                     </div>
                 </div>

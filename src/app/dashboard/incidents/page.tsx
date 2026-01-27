@@ -31,9 +31,15 @@ export default function IncidentsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
 
+    const toLocalISOString = (date: Date) => {
+        const d = new Date(date)
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+        return d.toISOString().slice(0, 16)
+    }
+
     // Form State
     const initialForm = {
-        reportDate: new Date().toISOString().slice(0, 16),
+        reportDate: toLocalISOString(new Date()),
         reporter: '',
         unit: '',
         description: '',
@@ -95,7 +101,7 @@ export default function IncidentsPage() {
     const handleEdit = (incident: Incident) => {
         setEditingId(incident._id)
         setForm({
-            reportDate: incident.reportDate ? new Date(incident.reportDate).toISOString().slice(0, 16) : '',
+            reportDate: incident.reportDate ? toLocalISOString(new Date(incident.reportDate)) : '',
             reporter: incident.reporter,
             unit: incident.unit,
             description: incident.description,
@@ -105,7 +111,7 @@ export default function IncidentsPage() {
             status: incident.status,
             investigation: incident.investigation || '',
             solution: incident.solution || '',
-            completionDate: incident.completionDate ? new Date(incident.completionDate).toISOString().slice(0, 16) : '',
+            completionDate: incident.completionDate ? toLocalISOString(new Date(incident.completionDate)) : '',
             pic: incident.pic || ''
         })
 

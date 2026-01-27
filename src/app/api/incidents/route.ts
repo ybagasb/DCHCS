@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const query: any = {}
     if (status) query.status = status
 
-    const incidents = await Incident.find(query).sort({ reportDate: -1 })
+    const incidents = await Incident.find(query).sort({ incidentId: 1 })
     return NextResponse.json(incidents)
 }
 
