@@ -172,50 +172,52 @@ export default function AccountsPage() {
                             <p>Loading users...</p>
                         ) : (
                             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-                                <table className="w-full text-left">
-                                    <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                        <tr>
-                                            <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Username</th>
-                                            <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Full Name</th>
-                                            <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Role</th>
-                                            <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                                        {users.map(user => (
-                                            <tr key={user._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                                <td className="p-4 font-medium">{user.username}</td>
-                                                <td className="p-4 text-slate-500 dark:text-slate-400">{user.fullName || '-'}</td>
-                                                <td className="p-4">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                                        {user.role}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 text-right space-x-2">
-                                                    <button
-                                                        onClick={() => handleEdit(user)}
-                                                        className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(user._id)}
-                                                        className="text-red-500 hover:text-red-600 transition-colors"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {users.length === 0 && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                                             <tr>
-                                                <td colSpan={4} className="p-8 text-center text-slate-500">
-                                                    No users found.
-                                                </td>
+                                                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Username</th>
+                                                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Full Name</th>
+                                                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Role</th>
+                                                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-right">Actions</th>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                                            {users.map(user => (
+                                                <tr key={user._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                    <td className="p-4 font-medium text-slate-900 dark:text-slate-100">{user.username}</td>
+                                                    <td className="p-4 text-slate-500 dark:text-slate-400">{user.fullName || '-'}</td>
+                                                    <td className="p-4">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                            {user.role}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 text-right space-x-2">
+                                                        <button
+                                                            onClick={() => handleEdit(user)}
+                                                            className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(user._id)}
+                                                            className="text-red-500 hover:text-red-600 transition-colors font-medium"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {users.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={4} className="p-8 text-center text-slate-500">
+                                                        No users found.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         )}
                     </div>

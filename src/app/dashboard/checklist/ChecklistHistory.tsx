@@ -46,22 +46,23 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
   if (loading) return <div className="text-center py-4 text-slate-500">Loading history...</div>
   if (data.length === 0) return <div className="text-center py-4 text-slate-500">No records found.</div>
 
+
   return (
-    <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
       <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
-        <thead className="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400">
+        <thead className="text-xs text-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
           <tr>
-            <th className="px-6 py-3 whitespace-nowrap">Date</th>
-            <th className="px-6 py-3 whitespace-nowrap">Officer</th>
-            <th className="px-6 py-3 whitespace-nowrap">PAC (T/H)</th>
-            <th className="px-6 py-3 whitespace-nowrap">UPS</th>
-            <th className="px-6 py-3 whitespace-nowrap">FSS</th>
-            <th className="px-6 py-3 whitespace-nowrap">EMS (R1/R2)</th>
-            <th className="px-6 py-3 whitespace-nowrap">Raised Floor</th>
-            <th className="px-6 py-3 whitespace-nowrap">Infra</th>
-            <th className="px-6 py-3 whitespace-nowrap">CCTV</th>
-            <th className="px-6 py-3 whitespace-nowrap">Notes</th>
-            <th className="px-6 py-3 whitespace-nowrap text-center">Actions</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">Date</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">Officer</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">PAC (T/H)</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">UPS</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">FSS</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">EMS (R1/R2)</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">Raised Floor</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">Infra</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">CCTV</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap">Notes</th>
+            <th className="px-6 py-4 font-semibold whitespace-nowrap text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -96,23 +97,22 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
                 {item.raisedFloor ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                       <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-                          item.raisedFloor.status === 'Critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 
-                          item.raisedFloor.status === 'Issue' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 
-                          'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                       }`}>
-                          {item.raisedFloor.status || 'OK'}
-                       </span>
+                      <span className={`px-2 py-0.5 rounded text-xs font-bold ${item.raisedFloor.status === 'Critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                          item.raisedFloor.status === 'Issue' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        }`}>
+                        {item.raisedFloor.status || 'OK'}
+                      </span>
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 grid grid-cols-2 gap-x-2">
-                        <span>Phys: {item.raisedFloor.physicalCondition || '-'}</span>
-                        <span>Clean: {item.raisedFloor.cleanliness || '-'}</span>
-                        <span>Air: {item.raisedFloor.airflowCooling || '-'}</span>
+                      <span>Phys: {item.raisedFloor.physicalCondition || '-'}</span>
+                      <span>Clean: {item.raisedFloor.cleanliness || '-'}</span>
+                      <span>Air: {item.raisedFloor.airflowCooling || '-'}</span>
                     </div>
                     {item.raisedFloor.notes && item.raisedFloor.notes !== 'No issue found' && (
-                        <div className="text-xs italic text-slate-600 dark:text-slate-300 mt-1 border-t border-slate-100 dark:border-slate-700 pt-1">
-                            "{item.raisedFloor.notes}"
-                        </div>
+                      <div className="text-xs italic text-slate-600 dark:text-slate-300 mt-1 border-t border-slate-100 dark:border-slate-700 pt-1">
+                        "{item.raisedFloor.notes}"
+                      </div>
                     )}
                   </div>
                 ) : (
@@ -128,8 +128,8 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
               <td className="px-6 py-4">{item.cctvDc}</td>
               <td className="px-6 py-4 max-w-xs text-xs">
                 <div className="space-y-1">
-                    {item.noted && <div title={item.noted}>{item.noted}</div>}
-                    {!item.noted && !item.raisedFloor?.notes && <span className="text-slate-400">-</span>}
+                  {item.noted && <div title={item.noted}>{item.noted}</div>}
+                  {!item.noted && !item.raisedFloor?.notes && <span className="text-slate-400">-</span>}
                 </div>
               </td>
               <td className="px-6 py-4 text-center">

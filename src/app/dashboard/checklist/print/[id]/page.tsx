@@ -75,7 +75,7 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
           </div>
           <div className="text-right">
              <h2 className="text-xl font-bold uppercase border-2 border-black inline-block px-4 py-1">
-                Checklist Item Data Center 2026
+                Checklist Item Data Center
              </h2>
           </div>
         </header>
