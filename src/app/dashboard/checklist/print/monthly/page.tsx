@@ -147,7 +147,7 @@ export default async function MonthlyPrintPage(props: {
                     {item.raisedFloor?.status === 'OK' ? 'OK' : 'Issue'}
                   </td>
 
-                  <td className="p-1">{item.rackCabling?.rack === 'Clean' ? 'OK' : 'X'}</td>
+                  <td className="p-1">{item.rackCabling?.rack === 'Clean & Locked' ? 'OK' : 'X'}</td>
                   <td className="p-1">{item.rackCabling?.cabling === 'Tidy' ? 'OK' : 'X'}</td>
                   <td className="p-1">{item.acSplitLights?.acSplit === 'On' ? 'OK' : 'X'}</td>
                   <td className="p-1">{item.acSplitLights?.lights === 'On' ? 'OK' : 'X'}</td>
@@ -167,7 +167,7 @@ export default async function MonthlyPrintPage(props: {
       {/* Legend */}
       <div className="mt-2 text-[9px] flex gap-4">
         <span className="font-bold">Legend:</span>
-        <span><span className="font-bold">OK</span> = Normal/Good/Clean/Tidy/On/Online</span>
+        <span><span className="font-bold">OK</span> = Normal/Good/Clean & Locked/Tidy/On/Online</span>
         <span><span className="font-bold text-red-600">!</span> = Alarm/Warning</span>
         <span><span className="font-bold text-red-600">X</span> = Dirty/Messy/Off/Problem</span>
       </div>

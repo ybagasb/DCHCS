@@ -40,13 +40,11 @@ const InputField = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         readOnly={readOnly}
-        className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border rounded-lg focus:outline-none focus:ring-2 disabled:opacity-50 transition-all ${
-          readOnly ? 'cursor-not-allowed opacity-70 bg-slate-100 dark:bg-slate-800' : ''
-        } ${
-          error
+        className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border rounded-lg focus:outline-none focus:ring-2 disabled:opacity-50 transition-all ${readOnly ? 'cursor-not-allowed opacity-70 bg-slate-100 dark:bg-slate-800' : ''
+          } ${error
             ? 'border-red-500 focus:ring-red-200'
             : 'border-slate-300 dark:border-slate-600 focus:ring-blue-500 focus:border-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400'
-        } ${suffix ? 'pr-10' : ''}`}
+          } ${suffix ? 'pr-10' : ''}`}
       />
       {suffix && (
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500 dark:text-slate-400">
@@ -79,11 +77,10 @@ const SelectField = ({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border rounded-lg focus:outline-none focus:ring-2 appearance-none transition-all cursor-pointer ${
-          error
+        className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border rounded-lg focus:outline-none focus:ring-2 appearance-none transition-all cursor-pointer ${error
             ? 'border-red-500 focus:ring-red-200'
             : 'border-slate-300 dark:border-slate-600 focus:ring-blue-500 focus:border-transparent text-slate-900 dark:text-slate-100'
-        }`}
+          }`}
       >
         <option value="" disabled>
           Select status...
@@ -110,7 +107,7 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
   const [step, setStep] = useState(1)
   const [errors, setErrors] = useState<Record<string, boolean>>({}) // Track errors by field key
   const totalSteps = 8
-  
+
   // Transition lock state to prevent double-click submissions
   const [isTransitioning, setIsTransitioning] = useState(false)
 
@@ -121,24 +118,24 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
     ups: { ups1: '', ups2: '' },
     fss: { lcdPanel: '', selenoid: '' },
     ems: { tempRoom1: '', tempRoom2: '' },
-    raisedFloor: { 
-      physicalCondition: '', 
-      cleanliness: '', 
-      airflowCooling: '', 
-      notes: 'No issue found', 
-      status: '' 
+    raisedFloor: {
+      physicalCondition: '',
+      cleanliness: '',
+      airflowCooling: '',
+      notes: 'No issue found',
+      status: ''
     },
     rackCabling: { rack: '', cabling: '' },
     acSplitLights: { acSplit: '', lights: '' },
     cctvDc: '',
     noted: '',
   })
-  
+
   // Fetch PIC schedule when date changes
   useEffect(() => { // eslint-disable-next-line
     const fetchPic = async () => {
       if (!formData.tgl) return
-      
+
       setLoadingPic(true)
       try {
         const res = await fetch(`/api/pic-schedule?date=${formData.tgl}`)
@@ -160,7 +157,7 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
     }
 
     const timer = setTimeout(() => {
-        fetchPic()
+      fetchPic()
     }, 500) // Debounce slightly to avoid rapid requests on manual typing if it were a text field (though here it's date picker)
 
     return () => clearTimeout(timer)
@@ -182,11 +179,11 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
       setFormData((prev) => ({
         ...prev,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        [section]: { 
-            ...(prev as any)[section], 
-            [field]: (field === 'temp' || field === 'humdty' || field === 'tempRoom1' || field === 'tempRoom2') 
-                ? Number(value) 
-                : value 
+        [section]: {
+          ...(prev as any)[section],
+          [field]: (field === 'temp' || field === 'humdty' || field === 'tempRoom1' || field === 'tempRoom2')
+            ? Number(value)
+            : value
         },
       }))
     }
@@ -251,23 +248,23 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
     if (isTransitioning) return // Prevent if locked
 
     console.log('handleSubmit called', { step, totalSteps })
-    
+
     // If not last step, explicitly treat as Next and STOP
     if (step < totalSteps) {
-        console.log('Not last step, redirecting to handleNext')
-        handleNext()
-        return
+      console.log('Not last step, redirecting to handleNext')
+      handleNext()
+      return
     }
-    
+
     if (!validateStep(step)) return
 
     // Confirmation dialog - DOUBLE CHECK step
     if (step === totalSteps) {
-        if (!confirm('Confirmation: Save monthly checklist data?')) {
-          return
-        }
+      if (!confirm('Confirmation: Save monthly checklist data?')) {
+        return
+      }
     } else {
-        return // Should never reach here due to first check, but safety first
+      return // Should never reach here due to first check, but safety first
     }
 
     setLoading(true)
@@ -288,12 +285,12 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
         ups: { ups1: '', ups2: '' },
         fss: { lcdPanel: '', selenoid: '' },
         ems: { tempRoom1: '', tempRoom2: '' },
-        raisedFloor: { 
-          physicalCondition: '', 
-          cleanliness: '', 
-          airflowCooling: '', 
-          notes: '', 
-          status: '' 
+        raisedFloor: {
+          physicalCondition: '',
+          cleanliness: '',
+          airflowCooling: '',
+          notes: '',
+          status: ''
         },
         rackCabling: { rack: '', cabling: '' },
         acSplitLights: { acSplit: '', lights: '' },
@@ -347,21 +344,21 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
       case 2:
         return (
           <InputGroup label="PAC System">
-            <InputField 
-                label="Temperature" 
-                value={formData.pac.temp} 
-                onChange={(v) => handleChange('pac', 'temp', v)} 
-                error={errors['pac.temp']} 
-                type="number"
-                suffix="°C"
+            <InputField
+              label="Temperature"
+              value={formData.pac.temp}
+              onChange={(v) => handleChange('pac', 'temp', v)}
+              error={errors['pac.temp']}
+              type="number"
+              suffix="°C"
             />
-            <InputField 
-                label="Humidity" 
-                value={formData.pac.humdty} 
-                onChange={(v) => handleChange('pac', 'humdty', v)} 
-                error={errors['pac.humdty']} 
-                type="number"
-                suffix="%"
+            <InputField
+              label="Humidity"
+              value={formData.pac.humdty}
+              onChange={(v) => handleChange('pac', 'humdty', v)}
+              error={errors['pac.humdty']}
+              type="number"
+              suffix="%"
             />
             <SelectField
               label="Alarm Status"
@@ -413,21 +410,21 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
       case 5:
         return (
           <InputGroup label="Environment Monitoring System (EMS)">
-            <InputField 
-                label="Temp Room 1" 
-                value={formData.ems.tempRoom1} 
-                onChange={(v) => handleChange('ems', 'tempRoom1', v)} 
-                error={errors['ems.tempRoom1']} 
-                type="number"
-                suffix="°C"
+            <InputField
+              label="Temp Room 1"
+              value={formData.ems.tempRoom1}
+              onChange={(v) => handleChange('ems', 'tempRoom1', v)}
+              error={errors['ems.tempRoom1']}
+              type="number"
+              suffix="°C"
             />
-            <InputField 
-                label="Temp Room 2" 
-                value={formData.ems.tempRoom2} 
-                onChange={(v) => handleChange('ems', 'tempRoom2', v)} 
-                error={errors['ems.tempRoom2']} 
-                type="number"
-                suffix="°C"
+            <InputField
+              label="Temp Room 2"
+              value={formData.ems.tempRoom2}
+              onChange={(v) => handleChange('ems', 'tempRoom2', v)}
+              error={errors['ems.tempRoom2']}
+              type="number"
+              suffix="°C"
             />
           </InputGroup>
         )
@@ -463,28 +460,28 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
               error={errors['raisedFloor.status']}
             />
             <div className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-3">
-                <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2 block">
-                    Notes
-                </label>
-                <input
-                    type="text"
-                    value={formData.raisedFloor.notes}
-                    onChange={(e) => handleChange('raisedFloor', 'notes', e.target.value)}
-                    className="w-full bg-transparent focus:outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400"
-                    placeholder="e.g. No issue found"
-                />
+              <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2 block">
+                Notes
+              </label>
+              <input
+                type="text"
+                value={formData.raisedFloor.notes}
+                onChange={(e) => handleChange('raisedFloor', 'notes', e.target.value)}
+                className="w-full bg-transparent focus:outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400"
+                placeholder="e.g. No issue found"
+              />
             </div>
           </InputGroup>
         )
       case 7:
-          return (
+        return (
           <div className="space-y-6">
             <InputGroup label="Infrastructure">
               <SelectField
                 label="Rack Status"
                 value={formData.rackCabling.rack}
                 onChange={(v) => handleChange('rackCabling', 'rack', v)}
-                options={['Clean', 'Dirty']}
+                options={['Clean & Locked', 'Dirty']}
                 error={errors['rackCabling.rack']}
               />
               <SelectField
@@ -522,16 +519,16 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
         return (
           <InputGroup label="Additional Information">
             <div className="bg-white dark:bg-slate-800 p-1 rounded-xl">
-                <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2 block">
-                    Notes / Keterangan Tambahan
-                </label>
-                <textarea
-                    rows={4}
-                    value={formData.noted}
-                    onChange={(e) => handleChange('root', 'noted', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all resize-none"
-                    placeholder="Tuliskan catatan tambahan jika ada..."
-                />
+              <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2 block">
+                Notes / Keterangan Tambahan
+              </label>
+              <textarea
+                rows={4}
+                value={formData.noted}
+                onChange={(e) => handleChange('root', 'noted', e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all resize-none"
+                placeholder="Tuliskan catatan tambahan jika ada..."
+              />
             </div>
           </InputGroup>
         )
@@ -540,21 +537,21 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
-        <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-slate-800 dark:text-white">New Checklist Entry</h2>
-                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Step {step} of {totalSteps}
-                </span>
-            </div>
-            {/* Progress Bar */}
-            <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                    className="h-full bg-blue-600 transition-all duration-300 ease-out"
-                    style={{ width: `${(step / totalSteps) * 100}%` }}
-                />
-            </div>
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white">New Checklist Entry</h2>
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            Step {step} of {totalSteps}
+          </span>
         </div>
+        {/* Progress Bar */}
+        <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-blue-600 transition-all duration-300 ease-out"
+            style={{ width: `${(step / totalSteps) * 100}%` }}
+          />
+        </div>
+      </div>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -573,11 +570,10 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
           type="button"
           onClick={prevStep}
           disabled={step === 1 || isTransitioning}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-colors ${
-            step === 1 || isTransitioning
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-colors ${step === 1 || isTransitioning
               ? 'text-slate-300 cursor-not-allowed hidden'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
+            }`}
         >
           <ChevronLeft className="w-4 h-4" />
           Back
@@ -600,12 +596,12 @@ export default function ChecklistForm({ onSuccess }: { onSuccess?: () => void })
             className="flex items-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
-                <span>Saving...</span>
+              <span>Saving...</span>
             ) : (
-                <>
-                    <Save className="w-4 h-4" />
-                    Submit Checklist
-                </>
+              <>
+                <Save className="w-4 h-4" />
+                Submit Checklist
+              </>
             )}
           </button>
         )}
