@@ -266,6 +266,7 @@ export default function IncidentsPage() {
                                                         {inc.attachments.slice(0, 3).map((att, idx) => (
                                                             <div key={idx} className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden" title={att.name}>
                                                                 {att.fileType.startsWith('image/') ? (
+                                                                    /* eslint-disable-next-line @next/next/no-img-element */
                                                                     <img src={att.url} alt="" className="h-full w-full object-cover" />
                                                                 ) : (
                                                                     <svg className="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -519,6 +520,7 @@ export default function IncidentsPage() {
                                         {form.attachments.map((att, idx) => (
                                             <div key={idx} className="relative group rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800/50 aspect-square flex flex-col items-center justify-center p-2 text-center">
                                                 {att.fileType.startsWith('image/') ? (
+                                                    /* eslint-disable-next-line @next/next/no-img-element */
                                                     <img src={att.url} alt={att.name} className="w-full h-full object-cover rounded" />
                                                 ) : (
                                                     <div className="flex flex-col items-center">

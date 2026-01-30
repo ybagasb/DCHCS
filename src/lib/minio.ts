@@ -1,11 +1,13 @@
 import * as Minio from 'minio'
 
+const endpoint = process.env.MINIO_ENDPOINT || 'localhost' // Use dummy for build-time evaluation
+
 const minioClient = new Minio.Client({
-    endPoint: process.env.MINIO_ENDPOINT || '',
-    port: parseInt(process.env.MINIO_PORT || '9001'),
+    endPoint: endpoint,
+    port: parseInt(process.env.MINIO_PORT || '9000'),
     useSSL: process.env.MINIO_USE_SSL === 'true',
-    accessKey: process.env.MINIO_ACCESS_KEY || '',
-    secretKey: process.env.MINIO_SECRET_KEY || '',
+    accessKey: process.env.MINIO_ACCESS_KEY || 'dummy_key',
+    secretKey: process.env.MINIO_SECRET_KEY || 'dummy_secret',
 })
 
 export const bucketName = process.env.MINIO_BUCKET || 'incident'

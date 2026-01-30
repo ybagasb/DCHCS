@@ -25,6 +25,12 @@ COPY . .
 ARG MONGODB_URI=mongodb://localhost:27017/alerting
 ENV MONGODB_URI=${MONGODB_URI}
 
+# Dummy variables for build-time evaluation
+ENV MINIO_ENDPOINT=localhost
+ENV MINIO_ACCESS_KEY=dummy
+ENV MINIO_SECRET_KEY=dummy
+ENV MINIO_BUCKET=incident
+
 RUN npm run build
 
 # Production image, copy all the files and run next
