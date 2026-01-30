@@ -20,6 +20,11 @@ type Incident = {
     investigation?: string
     solution?: string
     completionDate?: string
+    attachments?: Array<{
+        name: string
+        url: string
+        fileType: string
+    }>
 }
 
 const AREA_OPTIONS = ['Aplikasi', 'Network', 'Hardware']
@@ -50,7 +55,9 @@ export default function IncidentsPage() {
         investigation: '',
         solution: '',
         completionDate: '',
-        pic: ''
+        pic: '',
+        incidentId: '',
+        attachments: [] as Array<{ name: string; url: string; fileType: string }>
     }
     const [form, setForm] = useState(initialForm)
     const [areaDropdown, setAreaDropdown] = useState('')
@@ -112,7 +119,9 @@ export default function IncidentsPage() {
             investigation: incident.investigation || '',
             solution: incident.solution || '',
             completionDate: incident.completionDate ? toLocalISOString(new Date(incident.completionDate)) : '',
-            pic: incident.pic || ''
+            pic: incident.pic || '',
+            incidentId: incident.incidentId,
+            attachments: incident.attachments || []
         })
 
         // Logical check for dropdowns
@@ -129,6 +138,47 @@ export default function IncidentsPage() {
         if (!confirm('Are you sure?')) return
         await fetch(`/api/incidents/${id}`, { method: 'DELETE' })
         fetchIncidents()
+    }
+
+    const [uploading, setUploading] = useState(false)
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files
+        if (!files || files.length === 0) return
+
+        setUploading(true)
+        try {
+            const uploaded = [...form.attachments]
+            for (let i = 0; i < files.length; i++) {
+                const formData = new FormData()
+                formData.append('file', files[i])
+                if (form.incidentId) {
+                    formData.append('incidentId', form.incidentId)
+                }
+
+                const res = await fetch('/api/incidents/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+
+                if (res.ok) {
+                    const data = await res.json()
+                    uploaded.push(data)
+                }
+            }
+            setForm({ ...form, attachments: uploaded })
+        } catch (err) {
+            console.error('Upload failed', err)
+            alert('Failed to upload some files')
+        } finally {
+            setUploading(false)
+        }
+    }
+
+    const removeAttachment = (index: number) => {
+        const newAttachments = [...form.attachments]
+        newAttachments.splice(index, 1)
+        setForm({ ...form, attachments: newAttachments })
     }
 
     return (
@@ -150,12 +200,17 @@ export default function IncidentsPage() {
                             Print Report
                         </Link>
                         <button
-                            onClick={() => {
+                            onClick={async () => {
                                 setEditingId(null)
                                 setForm(initialForm)
                                 setAreaDropdown('')
                                 setLocationDropdown('')
                                 setIsModalOpen(true)
+
+                                // Fetch next ID for new incident
+                                const res = await fetch('/api/incidents?nextId=true')
+                                const data = await res.json()
+                                setForm(f => ({ ...f, incidentId: data.incidentId }))
                             }}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
                         >
@@ -206,6 +261,24 @@ export default function IncidentsPage() {
                                                 </span>
                                             </td>
                                             <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                                                {inc.attachments && inc.attachments.length > 0 && (
+                                                    <div className="flex -space-x-2 overflow-hidden mb-1 justify-end">
+                                                        {inc.attachments.slice(0, 3).map((att, idx) => (
+                                                            <div key={idx} className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden" title={att.name}>
+                                                                {att.fileType.startsWith('image/') ? (
+                                                                    <img src={att.url} alt="" className="h-full w-full object-cover" />
+                                                                ) : (
+                                                                    <svg className="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                        {inc.attachments.length > 3 && (
+                                                            <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold">
+                                                                +{inc.attachments.length - 3}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                                 <button onClick={() => handleEdit(inc)} className="text-blue-600 hover:text-blue-700 font-medium">Edit</button>
                                                 <button onClick={() => handleDelete(inc._id)} className="text-red-500 hover:text-red-600">Delete</button>
                                             </td>
@@ -436,6 +509,52 @@ export default function IncidentsPage() {
                                                 />
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-6">
+                                    <h4 className="font-semibold mb-3 text-slate-500 text-sm uppercase tracking-wider bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">Attachments (Photos & Docs)</h4>
+
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+                                        {form.attachments.map((att, idx) => (
+                                            <div key={idx} className="relative group rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800/50 aspect-square flex flex-col items-center justify-center p-2 text-center">
+                                                {att.fileType.startsWith('image/') ? (
+                                                    <img src={att.url} alt={att.name} className="w-full h-full object-cover rounded" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center">
+                                                        <svg className="w-8 h-8 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                        <span className="text-[10px] text-slate-500 truncate w-full px-1">{att.name}</span>
+                                                    </div>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeAttachment(idx)}
+                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                                <a
+                                                    href={att.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="absolute bottom-1 right-1 bg-blue-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                </a>
+                                            </div>
+                                        ))}
+
+                                        <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all text-slate-400 hover:text-blue-500">
+                                            {uploading ? (
+                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                                            ) : (
+                                                <>
+                                                    <svg className="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                                    <span className="text-xs font-medium">Add Files</span>
+                                                </>
+                                            )}
+                                            <input type="file" className="hidden" multiple onChange={handleFileUpload} disabled={uploading} />
+                                        </label>
                                     </div>
                                 </div>
                             </form>

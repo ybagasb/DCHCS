@@ -14,6 +14,11 @@ export interface IIncident extends Document {
     completionDate?: Date
     pic?: string
     status: 'Open' | 'In Progress' | 'Closed'
+    attachments?: Array<{
+        name: string
+        url: string
+        fileType: string
+    }>
     createdAt: Date
     updatedAt: Date
 }
@@ -72,6 +77,13 @@ const IncidentSchema = new Schema<IIncident>(
             enum: ['Open', 'In Progress', 'Closed'],
             default: 'Open',
         },
+        attachments: [
+            {
+                name: String,
+                url: String,
+                fileType: String,
+            },
+        ],
     },
     {
         timestamps: true,
