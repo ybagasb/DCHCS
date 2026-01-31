@@ -26,10 +26,7 @@ ARG MONGODB_URI=mongodb://localhost:27017/alerting
 ENV MONGODB_URI=${MONGODB_URI}
 
 # Dummy variables for build-time evaluation
-ENV MINIO_ENDPOINT=localhost
-ENV MINIO_ACCESS_KEY=dummy
-ENV MINIO_SECRET_KEY=dummy
-ENV MINIO_BUCKET=incident
+# MinIO variables removed as we switched to local storage.
 
 RUN npm run build
 

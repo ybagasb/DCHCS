@@ -33,6 +33,7 @@ const LOCATION_OPTIONS = ['Head Office', 'Head Office & Public']
 export default function IncidentsPage() {
     const [incidents, setIncidents] = useState<Incident[]>([])
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -69,13 +70,23 @@ export default function IncidentsPage() {
     }, [])
 
     const fetchIncidents = async () => {
+        setLoading(true)
+        setError(null)
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 15000)
+
         try {
-            const res = await fetch('/api/incidents')
+            const res = await fetch('/api/incidents', {
+                signal: controller.signal
+            })
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
             const data = await res.json()
             setIncidents(data)
-        } catch (err) {
-            console.error(err)
+        } catch (err: any) {
+            console.error('Fetch error:', err)
+            setError(err.name === 'AbortError' ? 'Request timed out' : err.message)
         } finally {
+            clearTimeout(timeoutId)
             setLoading(false)
         }
     }
@@ -175,10 +186,33 @@ export default function IncidentsPage() {
         }
     }
 
-    const removeAttachment = (index: number) => {
-        const newAttachments = [...form.attachments]
-        newAttachments.splice(index, 1)
-        setForm({ ...form, attachments: newAttachments })
+    const removeAttachment = async (index: number) => {
+        const attachment = form.attachments[index]
+        if (!attachment) return
+
+        if (!confirm(`Apakah kamu yakin ingin menghapus file "${attachment.name}", file ini akan terhapus permanen dari server?`)) {
+            return
+        }
+
+        try {
+            const res = await fetch('/api/incidents/upload/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: attachment.url })
+            })
+
+            if (res.ok) {
+                const newAttachments = [...form.attachments]
+                newAttachments.splice(index, 1)
+                setForm({ ...form, attachments: newAttachments })
+            } else {
+                console.error('Failed to delete file from server')
+                alert('Failed to delete file from server')
+            }
+        } catch (err) {
+            console.error('Error deleting file', err)
+            alert('Error deleting file')
+        }
     }
 
     return (
@@ -221,7 +255,21 @@ export default function IncidentsPage() {
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-10">Loading...</div>
+                    <div className="text-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <div className="text-slate-500 dark:text-slate-400">Loading Incidents...</div>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-20 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-200 dark:border-red-800/50">
+                        <div className="text-red-500 text-3xl mb-3">⚠️</div>
+                        <div className="text-red-700 dark:text-red-400 font-medium mb-4">Error: {error}</div>
+                        <button
+                            onClick={fetchIncidents}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
+                        >
+                            Try Again
+                        </button>
+                    </div>
                 ) : (
                     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
                         <div className="overflow-x-auto">

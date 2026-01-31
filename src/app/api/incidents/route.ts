@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
 import { Incident } from '@/models/Incident'
-import { getPresignedUrl } from '@/lib/minio'
 
 const generateIncidentId = async () => {
     const lastIncident = await Incident.findOne().sort({ incidentId: -1 })
@@ -14,38 +13,35 @@ const generateIncidentId = async () => {
 }
 
 export async function GET(req: Request) {
-    await connectDB()
-    const { searchParams } = new URL(req.url)
-    const status = searchParams.get('status')
+    console.log('GET /api/incidents - Start')
+    try {
+        await connectDB()
+        console.log('GET /api/incidents - DB Connected')
+        const { searchParams } = new URL(req.url)
+        const status = searchParams.get('status')
 
-    const query: any = {}
-    if (status) query.status = status
+        const query: any = {}
+        if (status) query.status = status
 
-    if (searchParams.get('nextId') === 'true') {
-        const nextId = await generateIncidentId()
-        return NextResponse.json({ incidentId: nextId })
-    }
-
-    const incidents = await Incident.find(query).sort({ incidentId: 1 }).lean()
-
-    // Regenerate presigned URLs for each attachment
-    const incidentsWithUrls = await Promise.all(incidents.map(async (inc: any) => {
-        if (inc.attachments && inc.attachments.length > 0) {
-            const updatedAttachments = await Promise.all(inc.attachments.map(async (att: any) => {
-                try {
-                    const freshUrl = await getPresignedUrl(att.name)
-                    return { ...att, url: freshUrl }
-                } catch (err) {
-                    console.error('Error generating presigned URL for', att.name, err)
-                    return att
-                }
-            }))
-            return { ...inc, attachments: updatedAttachments }
+        if (searchParams.get('nextId') === 'true') {
+            const nextId = await generateIncidentId()
+            return NextResponse.json({ incidentId: nextId })
         }
-        return inc
-    }))
 
-    return NextResponse.json(incidentsWithUrls)
+        console.log('GET /api/incidents - Fetching from DB...')
+        const incidents = await Incident.find(query).sort({ incidentId: 1 }).lean()
+        console.log(`GET /api/incidents - Found ${incidents.length} incidents`)
+
+        // attachments already contain the relative URL (e.g. /uploads/...)
+        // No need to regenerate presigned URLs as we are using local storage.
+
+        console.log('GET /api/incidents - Success')
+
+        return NextResponse.json(incidents)
+    } catch (error) {
+        console.error('GET INCIDENTS ERROR:', error)
+        return NextResponse.json({ message: 'Error fetching incidents' }, { status: 500 })
+    }
 }
 
 export async function POST(req: Request) {
