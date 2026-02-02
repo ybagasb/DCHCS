@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
 import { Incident } from '@/models/Incident'
 
+export const dynamic = 'force-dynamic'
+
 const generateIncidentId = async () => {
     const lastIncident = await Incident.findOne().sort({ incidentId: -1 })
     if (!lastIncident) return 'INC-00001'
@@ -32,12 +34,24 @@ export async function GET(req: Request) {
         const incidents = await Incident.find(query).sort({ incidentId: 1 }).lean()
         console.log(`GET /api/incidents - Found ${incidents.length} incidents`)
 
-        // attachments already contain the relative URL (e.g. /uploads/...)
-        // No need to regenerate presigned URLs as we are using local storage.
+        // Normalize and Redirect attachment URLs to our custom Viewing API
+        const normalizedIncidents = incidents.map((inc: any) => {
+            if (inc.attachments && Array.isArray(inc.attachments)) {
+                inc.attachments = inc.attachments.map((att: any) => {
+                    let newUrl = att.url
+                    // Transform /uploads/incident/ or /uploads/incidents/ to /api/incidents/view/...
+                    if (newUrl.startsWith('/uploads/')) {
+                        newUrl = newUrl.replace('/uploads/', '/api/incidents/view/')
+                    }
+                    return { ...att, url: newUrl }
+                })
+            }
+            return inc
+        })
 
         console.log('GET /api/incidents - Success')
 
-        return NextResponse.json(incidents)
+        return NextResponse.json(normalizedIncidents)
     } catch (error) {
         console.error('GET INCIDENTS ERROR:', error)
         return NextResponse.json({ message: 'Error fetching incidents' }, { status: 500 })

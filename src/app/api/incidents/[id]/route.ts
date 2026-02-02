@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
 import { Incident } from '@/models/Incident'
 
+export const dynamic = 'force-dynamic'
+
 export async function PUT(
     req: Request,
     { params }: { params: Promise<{ id: string }> }

@@ -14,8 +14,8 @@ export async function saveLocalFile(buffer: Buffer, fileName: string, incidentId
     // Write file
     await fs.writeFile(filePath, buffer)
 
-    // Return relative URL for frontend
-    const relativeUrl = `/uploads/incident/${incidentId}/${fileName}`
+    // Return relative URL for frontend (using Proxy API instead of direct uploads path)
+    const relativeUrl = `/api/incidents/view/incident/${incidentId}/${fileName}`
 
     return {
         name: fileName,
@@ -26,18 +26,32 @@ export async function saveLocalFile(buffer: Buffer, fileName: string, incidentId
 
 export async function deleteLocalFile(relativeUrl: string) {
     try {
-        // Ensure the URL is relative and starts with /uploads/incident/ or /uploads/incidents/
-        if (!relativeUrl.startsWith('/uploads/incident/') && !relativeUrl.startsWith('/uploads/incidents/')) {
+        // Normalize URL if it comes from our Proxy API
+        let normalizedPath = relativeUrl
+        if (normalizedPath.startsWith('/api/incidents/view/')) {
+            normalizedPath = normalizedPath.replace('/api/incidents/view/', '/uploads/')
+        }
+
+        // Ensure the URL is relative and starts with sanctioned paths
+        if (!normalizedPath.startsWith('/uploads/incident/') && !normalizedPath.startsWith('/uploads/incidents/')) {
             throw new Error('Invalid file path for deletion')
         }
 
-        const absolutePath = path.join(process.cwd(), 'public', relativeUrl)
+        const absolutePath = path.join(process.cwd(), 'public', normalizedPath)
 
-        // Check if file exists before trying to delete
-        await fs.access(absolutePath)
-        await fs.unlink(absolutePath)
+        try {
+            // Check if file exists before trying to delete
+            await fs.access(absolutePath)
+            await fs.unlink(absolutePath)
+            console.log(`Deleted file: ${absolutePath}`)
+        } catch (error: any) {
+            if (error.code === 'ENOENT') {
+                console.warn(`File already missing, skipping physical deletion: ${absolutePath}`)
+                return true // Return true so the UI/DB update can proceed
+            }
+            throw error // Rethrow other errors
+        }
 
-        console.log(`Deleted file: ${absolutePath}`)
         return true
     } catch (error: any) {
         console.error(`Error deleting file: ${relativeUrl}`, error)

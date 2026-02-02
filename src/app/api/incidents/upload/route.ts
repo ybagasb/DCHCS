@@ -9,6 +9,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'No file uploaded' }, { status: 400 })
         }
 
+        const MAX_SIZE = 200 * 1024 * 1024 // 200MB
+        if (file.size > MAX_SIZE) {
+            return NextResponse.json({ message: 'File too large (max 200MB)' }, { status: 413 })
+        }
+
         const buffer = Buffer.from(await file.arrayBuffer())
         const incidentId = formData.get('incidentId') as string
         const prefix = incidentId ? incidentId : 'general'

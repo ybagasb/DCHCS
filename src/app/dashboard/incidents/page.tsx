@@ -37,7 +37,8 @@ export default function IncidentsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
 
-    const toLocalISOString = (date: Date) => {
+    const toLocalISOString = (date: any) => {
+        if (!date || isNaN(new Date(date).getTime())) return ''
         const d = new Date(date)
         d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
         return d.toISOString().slice(0, 16)
@@ -76,7 +77,7 @@ export default function IncidentsPage() {
         const timeoutId = setTimeout(() => controller.abort(), 15000)
 
         try {
-            const res = await fetch('/api/incidents', {
+            const res = await fetch(`/api/incidents?t=${Date.now()}`, {
                 signal: controller.signal
             })
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
@@ -97,10 +98,17 @@ export default function IncidentsPage() {
             const url = editingId ? `/api/incidents/${editingId}` : '/api/incidents'
             const method = editingId ? 'PUT' : 'POST'
 
+            // Prepare data by ensuring dates are sent as UTC ISO strings
+            const submissionData = {
+                ...form,
+                reportDate: form.reportDate ? new Date(form.reportDate).toISOString() : new Date().toISOString(),
+                completionDate: form.completionDate ? new Date(form.completionDate).toISOString() : undefined
+            }
+
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
+                body: JSON.stringify(submissionData),
             })
 
             if (res.ok) {
@@ -157,10 +165,15 @@ export default function IncidentsPage() {
         const files = e.target.files
         if (!files || files.length === 0) return
 
+        const MAX_SIZE = 200 * 1024 * 1024 // 200MB
         setUploading(true)
         try {
             const uploaded = [...form.attachments]
             for (let i = 0; i < files.length; i++) {
+                if (files[i].size > MAX_SIZE) {
+                    alert(`File "${files[i].name}" is too large. Maximum size is 200MB.`)
+                    continue
+                }
                 const formData = new FormData()
                 formData.append('file', files[i])
                 if (form.incidentId) {
@@ -289,7 +302,9 @@ export default function IncidentsPage() {
                                     {incidents.map(inc => (
                                         <tr key={inc._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                             <td className="p-4 font-mono font-medium text-blue-600 dark:text-blue-400">{inc.incidentId}</td>
-                                            <td className="p-4 whitespace-nowrap text-slate-500">{new Date(inc.reportDate).toLocaleDateString()}</td>
+                                            <td className="p-4 whitespace-nowrap text-slate-500">
+                                                {new Date(inc.reportDate).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                            </td>
                                             <td className="p-4 max-w-xs truncate" title={inc.description}>{inc.description}</td>
                                             <td className="p-4 text-slate-500">{inc.reporter}</td>
                                             <td className="p-4">
