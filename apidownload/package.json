@@ -1,0 +1,19 @@
+{
+  "name": "download-api",
+  "version": "1.0.0",
+  "description": "API sederhana untuk mengunduh file besar dengan streaming",
+  "main": "download-api.js",
+  "scripts": {
+    "start": "node download-api.js",
+    "dev": "nodemon download-api.js"
+  },
+  "keywords": ["api", "download", "streaming", "file"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
