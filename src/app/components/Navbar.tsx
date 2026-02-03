@@ -16,9 +16,9 @@ export default function Navbar() {
   const navLinks = [
     { href: '/dashboard', label: 'Links', icon: Home },
     { href: '/dashboard/checklist', label: 'Checklist', icon: ClipboardCheck },
-    { href: '/dashboard/checklist/report', label: 'Report', icon: FileText },
     { href: '/dashboard/accounts', label: 'Accounts', icon: UserCircle },
     { href: '/dashboard/incidents', label: 'Incidents', icon: AlertTriangle },
+    { href: '/dashboard/rcs', label: 'RCS', icon: ClipboardCheck },
   ]
 
   return (
@@ -27,7 +27,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center gap-4 md:gap-8">
             <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent truncate max-w-[150px] md:max-w-none">
-              <Link href="/dashboard">DCHCS</Link>
+              <Link href="/dashboard">OMNIOPSSEC</Link>
             </h1>
 
             {/* Desktop Links */}

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Plus, Printer, Loader2, AlertCircle, Calendar, User, FileText, CheckCircle2, Info, Search, ShieldAlert, ChevronRight, ChevronLeft, Paperclip, X, Trash2 } from 'lucide-react'
 
 type Incident = {
     _id: string
@@ -64,11 +65,13 @@ export default function IncidentsPage() {
     const [form, setForm] = useState(initialForm)
     const [areaDropdown, setAreaDropdown] = useState('')
     const [locationDropdown, setLocationDropdown] = useState('')
+    const [month, setMonth] = useState(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`)
+    const [step, setStep] = useState(1)
     const router = useRouter()
 
     useEffect(() => {
         fetchIncidents()
-    }, [])
+    }, [month])
 
     const fetchIncidents = async () => {
         setLoading(true)
@@ -77,7 +80,7 @@ export default function IncidentsPage() {
         const timeoutId = setTimeout(() => controller.abort(), 15000)
 
         try {
-            const res = await fetch(`/api/incidents?t=${Date.now()}`, {
+            const res = await fetch(`/api/incidents?month=${month}&t=${Date.now()}`, {
                 signal: controller.signal
             })
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
@@ -233,414 +236,488 @@ export default function IncidentsPage() {
             <Navbar />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white">Incident Management</h2>
-                        <p className="text-slate-500 dark:text-slate-400 mt-1">Track and resolve IT incidents.</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <Link
-                            href="/dashboard/incidents/print"
-                            className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg font-medium hover:bg-slate-300 dark:hover:bg-slate-700 transition flex items-center gap-2"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                            Print Report
-                        </Link>
-                        <button
-                            onClick={async () => {
-                                setEditingId(null)
-                                setForm(initialForm)
-                                setAreaDropdown('')
-                                setLocationDropdown('')
-                                setIsModalOpen(true)
+                <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-red-50 dark:bg-red-900/30 rounded-xl">
+                                <ShieldAlert className="w-6 h-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div>
+                                <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">INCIDENTS</h1>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">Track and resolve IT issues.</p>
+                            </div>
+                        </div>
 
-                                // Fetch next ID for new incident
-                                const res = await fetch('/api/incidents?nextId=true')
-                                const data = await res.json()
-                                setForm(f => ({ ...f, incidentId: data.incidentId }))
-                            }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                            New Incident
-                        </button>
+                        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 md:gap-3 w-full md:w-auto">
+                            <input
+                                type="month"
+                                value={month}
+                                onChange={(e) => setMonth(e.target.value)}
+                                className="col-span-2 sm:col-auto px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                            />
+
+                            <button
+                                onClick={async () => {
+                                    setEditingId(null)
+                                    setForm(initialForm)
+                                    setStep(1)
+                                    setAreaDropdown('')
+                                    setLocationDropdown('')
+                                    setIsModalOpen(true)
+                                    const res = await fetch('/api/incidents?nextId=true')
+                                    const data = await res.json()
+                                    setForm(f => ({ ...f, incidentId: data.incidentId }))
+                                }}
+                                className="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                            >
+                                <Plus className="w-4 h-4" />
+                                New Incident
+                            </button>
+
+                            <Link
+                                href="/dashboard/incidents/print"
+                                className="col-span-2 sm:col-auto px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+                            >
+                                <Printer className="w-4 h-4" />
+                                Print Report
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
-                {loading ? (
-                    <div className="text-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <div className="text-slate-500 dark:text-slate-400">Loading Incidents...</div>
-                    </div>
-                ) : error ? (
-                    <div className="text-center py-20 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-200 dark:border-red-800/50">
-                        <div className="text-red-500 text-3xl mb-3">⚠️</div>
-                        <div className="text-red-700 dark:text-red-400 font-medium mb-4">Error: {error}</div>
-                        <button
-                            onClick={fetchIncidents}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
-                        >
-                            Try Again
-                        </button>
-                    </div>
-                ) : (
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                    <tr>
-                                        <th className="p-4 font-semibold whitespace-nowrap">ID</th>
-                                        <th className="p-4 font-semibold whitespace-nowrap">Date</th>
-                                        <th className="p-4 font-semibold">Description</th>
-                                        <th className="p-4 font-semibold whitespace-nowrap">Reporter</th>
-                                        <th className="p-4 font-semibold whitespace-nowrap">Category</th>
-                                        <th className="p-4 font-semibold whitespace-nowrap">Status</th>
-                                        <th className="p-4 font-semibold text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                                    {incidents.map(inc => (
-                                        <tr key={inc._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                            <td className="p-4 font-mono font-medium text-blue-600 dark:text-blue-400">{inc.incidentId}</td>
-                                            <td className="p-4 whitespace-nowrap text-slate-500">
-                                                {new Date(inc.reportDate).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
-                                            </td>
-                                            <td className="p-4 max-w-xs truncate" title={inc.description}>{inc.description}</td>
-                                            <td className="p-4 text-slate-500">{inc.reporter}</td>
-                                            <td className="p-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${inc.category === 'High' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                                                    inc.category === 'Medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                                        'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                    }`}>
-                                                    {inc.category}
-                                                </span>
-                                            </td>
-                                            <td className="p-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium border ${inc.status === 'Open' ? 'border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-400' :
-                                                    inc.status === 'Closed' ? 'border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-400' :
-                                                        'border-purple-200 text-purple-700 dark:border-purple-800 dark:text-purple-400'
-                                                    }`}>
-                                                    {inc.status}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 text-right space-x-2 whitespace-nowrap">
-                                                {inc.attachments && inc.attachments.length > 0 && (
-                                                    <div className="flex -space-x-2 overflow-hidden mb-1 justify-end">
-                                                        {inc.attachments.slice(0, 3).map((att, idx) => (
-                                                            <div key={idx} className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden" title={att.name}>
-                                                                {att.fileType.startsWith('image/') ? (
-                                                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                                                    <img src={att.url} alt="" className="h-full w-full object-cover" />
-                                                                ) : (
-                                                                    <svg className="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                        {inc.attachments.length > 3 && (
-                                                            <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold">
-                                                                +{inc.attachments.length - 3}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                <button onClick={() => handleEdit(inc)} className="text-blue-600 hover:text-blue-700 font-medium">Edit</button>
-                                                <button onClick={() => handleDelete(inc._id)} className="text-red-500 hover:text-red-600">Delete</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {incidents.length === 0 && (
-                                        <tr>
-                                            <td colSpan={7} className="p-8 text-center text-slate-500">No incidents found. Create one to get started.</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    {loading ? (
+                        <div className="py-20 flex justify-center">
+                            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
                         </div>
-                    </div>
-                )}
+                    ) : error ? (
+                        <div className="py-20 text-center px-4">
+                            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-white">Failed to load incidents</h3>
+                            <p className="text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto text-sm">{error}</p>
+                            <button onClick={fetchIncidents} className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">Try Again</button>
+                        </div>
+                    ) : incidents.length === 0 ? (
+                        <div className="py-20 text-center text-slate-500 dark:text-slate-400">
+                            No incident records found for this month.
+                        </div>
+                    ) : (
+                        <>
+                            {/* Desktop Table */}
+                            <div className="hidden md:block overflow-x-auto">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-slate-50 dark:bg-slate-700/50 text-slate-700 dark:text-slate-200 uppercase text-[10px] font-bold tracking-wider">
+                                        <tr>
+                                            <th className="px-6 py-4 border-b dark:border-slate-600">ID</th>
+                                            <th className="px-6 py-4 border-b dark:border-slate-600">Time & Reporter</th>
+                                            <th className="px-6 py-4 border-b dark:border-slate-600">Area & Location</th>
+                                            <th className="px-6 py-4 border-b dark:border-slate-600">Description</th>
+                                            <th className="px-6 py-4 border-b dark:border-slate-600 text-center">Severity</th>
+                                            <th className="px-6 py-4 border-b dark:border-slate-600 text-center">Status</th>
+                                            <th className="px-6 py-4 border-b dark:border-slate-600 text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                        {incidents.map(inc => (
+                                            <tr key={inc._id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                                <td className="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">{inc.incidentId}</td>
+                                                <td className="px-6 py-4">
+                                                    <div className="font-bold text-slate-800 dark:text-white">{new Date(inc.reportDate).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</div>
+                                                    <div className="text-[11px] text-slate-500 flex items-center gap-1"><User className="w-3 h-3" /> {inc.reporter} ({inc.unit})</div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="font-medium text-slate-700 dark:text-slate-300">{inc.area}</div>
+                                                    <div className="text-[11px] text-slate-500">{inc.location}</div>
+                                                </td>
+                                                <td className="px-6 py-4 max-w-xs truncate italic text-slate-600 dark:text-slate-400" title={inc.description}>
+                                                    {inc.description}
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${inc.category === 'High' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                                                        inc.category === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                                            'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                                        }`}>
+                                                        {inc.category}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${inc.status === 'Open' ? 'border-red-200 text-red-700 bg-red-50 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400' :
+                                                        inc.status === 'Closed' ? 'border-emerald-200 text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400' :
+                                                            'border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800/50 dark:text-blue-400'
+                                                        }`}>
+                                                        {inc.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right space-x-3">
+                                                    <button onClick={() => handleEdit(inc)} className="text-blue-600 hover:text-blue-700 font-bold text-xs uppercase">Edit</button>
+                                                    <button onClick={() => handleDelete(inc._id)} className="text-red-500 hover:text-red-600 font-bold text-xs uppercase">Delete</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700/50">
+                                {incidents.map(inc => (
+                                    <div key={inc._id} className="p-5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">{inc.incidentId}</span>
+                                                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${inc.category === 'High' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}>
+                                                        {inc.category}
+                                                    </span>
+                                                </div>
+                                                <h3 className="text-sm font-bold text-slate-800 dark:text-white mt-1">{inc.reporter}</h3>
+                                                <p className="text-[10px] text-slate-500">{new Date(inc.reportDate).toLocaleDateString()} at {new Date(inc.reportDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                            </div>
+                                            <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border ${inc.status === 'Open' ? 'border-red-200 text-red-700 bg-red-50 dark:bg-red-900/20' : 'border-emerald-200 text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20'}`}>
+                                                {inc.status}
+                                            </span>
+                                        </div>
+
+                                        <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 text-xs italic text-slate-600 dark:text-slate-400">
+                                            "{inc.description}"
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3 mb-4">
+                                            <div className="p-2.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Area</p>
+                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{inc.area}</p>
+                                            </div>
+                                            <div className="p-2.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Unit</p>
+                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{inc.unit}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <button onClick={() => handleEdit(inc)} className="flex-1 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Edit</button>
+                                            <button onClick={() => handleDelete(inc._id)} className="flex-1 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Delete</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
             </main>
 
             {/* Modal Form */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col">
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50 flex-shrink-0 rounded-t-2xl">
-                            <h3 className="text-xl font-bold text-slate-800 dark:text-white">{editingId ? 'Edit Incident' : 'Report New Incident'}</h3>
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="text-slate-400 hover:text-slate-600 transition-colors"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-800 w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                        <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                    <ShieldAlert className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                                    {editingId ? 'Edit Incident' : 'New Incident Report'}
+                                </h3>
+                            </div>
+                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full transition-colors">
+                                <X className="w-6 h-6 text-slate-400" />
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
-                            <form id="incident-form" onSubmit={handleSubmit} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Report Time</label>
-                                        <input
-                                            type="datetime-local"
-                                            className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                            value={form.reportDate}
-                                            onChange={e => setForm({ ...form, reportDate: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Status</label>
-                                        <select
-                                            className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                            value={form.status}
-                                            onChange={e => setForm({ ...form, status: e.target.value })}
-                                        >
-                                            <option value="Open">Open</option>
-                                            <option value="In Progress">In Progress</option>
-                                            <option value="Closed">Closed</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Reporter</label>
-                                        <input
-                                            type="text"
-                                            className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                            value={form.reporter}
-                                            onChange={e => setForm({ ...form, reporter: e.target.value })}
-                                            required
-                                            placeholder="Nama Pelapor"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Unit / Department</label>
-                                        <input
-                                            type="text"
-                                            className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                            value={form.unit}
-                                            onChange={e => setForm({ ...form, unit: e.target.value })}
-                                            required
-                                            placeholder="Unit Kerja"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Description</label>
-                                    <textarea
-                                        className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                        rows={3}
-                                        value={form.description}
-                                        onChange={e => setForm({ ...form, description: e.target.value })}
-                                        required
-                                        placeholder="Detail kejadian..."
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Area</label>
-                                        <div className="space-y-2">
-                                            <select
-                                                className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                                value={areaDropdown}
-                                                onChange={e => {
-                                                    const val = e.target.value;
-                                                    setAreaDropdown(val);
-                                                    if (val !== 'Other') {
-                                                        setForm({ ...form, area: val });
-                                                    } else {
-                                                        setForm({ ...form, area: '' });
-                                                    }
-                                                }}
-                                                required={areaDropdown !== 'Other'}
-                                            >
-                                                <option value="" disabled>Select Area</option>
-                                                {AREA_OPTIONS.map(opt => (
-                                                    <option key={opt} value={opt}>{opt}</option>
-                                                ))}
-                                                <option value="Other">Other...</option>
-                                            </select>
-
-                                            {areaDropdown === 'Other' && (
-                                                <input
-                                                    type="text"
-                                                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                                    value={form.area}
-                                                    onChange={e => setForm({ ...form, area: e.target.value })}
-                                                    required
-                                                    placeholder="Input Custom Area"
-                                                    autoFocus
-                                                />
-                                            )}
+                        {/* Progress Bar (Wizard Style) */}
+                        <div className="px-8 pt-6 pb-2">
+                            <div className="flex justify-between mb-2">
+                                {[1, 2, 3, 4].map((s) => (
+                                    <div key={s} className="flex flex-col items-center gap-1">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step >= s ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-110' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}`}>
+                                            {s}
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Location</label>
-                                        <div className="space-y-2">
-                                            <select
-                                                className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                                value={locationDropdown}
-                                                onChange={e => {
-                                                    const val = e.target.value;
-                                                    setLocationDropdown(val);
-                                                    if (val !== 'Other') {
-                                                        setForm({ ...form, location: val });
-                                                    } else {
-                                                        setForm({ ...form, location: '' });
-                                                    }
-                                                }}
-                                                required={locationDropdown !== 'Other'}
-                                            >
-                                                <option value="" disabled>Select Location</option>
-                                                {LOCATION_OPTIONS.map(opt => (
-                                                    <option key={opt} value={opt}>{opt}</option>
-                                                ))}
-                                                <option value="Other">Other...</option>
-                                            </select>
+                                ))}
+                            </div>
+                            <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-600 transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }}></div>
+                            </div>
+                        </div>
 
-                                            {locationDropdown === 'Other' && (
-                                                <input
-                                                    type="text"
-                                                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                                    value={form.location}
-                                                    onChange={e => setForm({ ...form, location: e.target.value })}
-                                                    required
-                                                    placeholder="Input Custom Location"
-                                                    autoFocus
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Category</label>
-                                        <select
-                                            className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                            value={form.category}
-                                            onChange={e => setForm({ ...form, category: e.target.value })}
-                                        >
-                                            <option value="High">High / Mendesak</option>
-                                            <option value="Medium">Medium / Sedang</option>
-                                            <option value="Low">Low / Rendah</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-6">
-                                    <h4 className="font-semibold mb-3 text-slate-500 text-sm uppercase tracking-wider bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">Verification / Solution</h4>
-
-                                    <div className="space-y-3">
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">Investigation</label>
-                                            <textarea
-                                                className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent"
-                                                rows={2}
-                                                value={form.investigation}
-                                                onChange={e => setForm({ ...form, investigation: e.target.value })}
-                                                placeholder="Hasil investigasi..."
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">Solution</label>
-                                            <textarea
-                                                className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent"
-                                                rows={2}
-                                                value={form.solution}
-                                                onChange={e => setForm({ ...form, solution: e.target.value })}
-                                                placeholder="Solusi permanen/sementara..."
-                                            />
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
+                            <form id="incident-form" onSubmit={handleSubmit} className="space-y-6">
+                                {step === 1 && (
+                                    <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Report Time</label>
+                                                <div className="relative">
+                                                    <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                                                    <input
+                                                        type="datetime-local"
+                                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                        value={form.reportDate}
+                                                        onChange={e => setForm({ ...form, reportDate: e.target.value })}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Reporter Name</label>
+                                                <div className="relative">
+                                                    <User className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                                                    <input
+                                                        type="text"
+                                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                        value={form.reporter}
+                                                        onChange={e => setForm({ ...form, reporter: e.target.value })}
+                                                        required
+                                                        placeholder="e.g. Bagas"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium mb-1">Completion Time</label>
+                                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Unit / Department</label>
+                                                <div className="relative">
+                                                    <Info className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                                                    <input
+                                                        type="text"
+                                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                        value={form.unit}
+                                                        onChange={e => setForm({ ...form, unit: e.target.value })}
+                                                        required
+                                                        placeholder="e.g. Infrastructure"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Area</label>
+                                                <select
+                                                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                    value={areaDropdown}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setAreaDropdown(val);
+                                                        if (val !== 'Other') setForm({ ...form, area: val });
+                                                        else setForm({ ...form, area: '' });
+                                                    }}
+                                                    required={areaDropdown !== 'Other'}
+                                                >
+                                                    <option value="" disabled>Select Area</option>
+                                                    {AREA_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                                    <option value="Other">Other...</option>
+                                                </select>
+                                                {areaDropdown === 'Other' && (
+                                                    <input
+                                                        type="text"
+                                                        className="mt-2 w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-blue-500 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                        value={form.area}
+                                                        onChange={e => setForm({ ...form, area: e.target.value })}
+                                                        required
+                                                        placeholder="Specify Area"
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Location</label>
+                                            <select
+                                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                value={locationDropdown}
+                                                onChange={e => {
+                                                    const val = e.target.value;
+                                                    setLocationDropdown(val);
+                                                    if (val !== 'Other') setForm({ ...form, location: val });
+                                                    else setForm({ ...form, location: '' });
+                                                }}
+                                                required={locationDropdown !== 'Other'}
+                                            >
+                                                <option value="" disabled>Select Location</option>
+                                                {LOCATION_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                                <option value="Other">Other...</option>
+                                            </select>
+                                            {locationDropdown === 'Other' && (
+                                                <input
+                                                    type="text"
+                                                    className="mt-2 w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-blue-500 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                    value={form.location}
+                                                    onChange={e => setForm({ ...form, location: e.target.value })}
+                                                    required
+                                                    placeholder="Specify Location"
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {step === 2 && (
+                                    <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Incident Description</label>
+                                            <div className="relative">
+                                                <FileText className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                                                <textarea
+                                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[120px]"
+                                                    value={form.description}
+                                                    onChange={e => setForm({ ...form, description: e.target.value })}
+                                                    required
+                                                    placeholder="Provide details about the incident..."
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Category / Severity</label>
+                                                <select
+                                                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                                    value={form.category}
+                                                    onChange={e => setForm({ ...form, category: e.target.value })}
+                                                >
+                                                    <option value="High">High / Critical</option>
+                                                    <option value="Medium">Medium / Normal</option>
+                                                    <option value="Low">Low / Minor</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Initial Status</label>
+                                                <select
+                                                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                                    value={form.status}
+                                                    onChange={e => setForm({ ...form, status: e.target.value })}
+                                                >
+                                                    <option value="Open">Open</option>
+                                                    <option value="In Progress">In Progress</option>
+                                                    <option value="Closed">Closed</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {step === 3 && (
+                                    <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Investigation Details</label>
+                                            <textarea
+                                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[80px]"
+                                                value={form.investigation}
+                                                onChange={e => setForm({ ...form, investigation: e.target.value })}
+                                                placeholder="What was discovered during investigation?"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Resolution / Solution</label>
+                                            <textarea
+                                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[80px]"
+                                                value={form.solution}
+                                                onChange={e => setForm({ ...form, solution: e.target.value })}
+                                                placeholder="How was the issue resolved?"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Completion Time</label>
                                                 <input
                                                     type="datetime-local"
-                                                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent"
+                                                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                                                     value={form.completionDate}
                                                     onChange={e => setForm({ ...form, completionDate: e.target.value })}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium mb-1">PIC</label>
+                                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Action Taken By (PIC)</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent"
+                                                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                                                     value={form.pic}
                                                     onChange={e => setForm({ ...form, pic: e.target.value })}
-                                                    placeholder="Joko - Infra"
+                                                    placeholder="Name of PIC"
                                                 />
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
-                                <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-6">
-                                    <h4 className="font-semibold mb-3 text-slate-500 text-sm uppercase tracking-wider bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">Attachments (Photos & Docs)</h4>
-
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
-                                        {form.attachments.map((att, idx) => (
-                                            <div key={idx} className="relative group rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800/50 aspect-square flex flex-col items-center justify-center p-2 text-center">
-                                                {att.fileType.startsWith('image/') ? (
-                                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                                    <img src={att.url} alt={att.name} className="w-full h-full object-cover rounded" />
-                                                ) : (
-                                                    <div className="flex flex-col items-center">
-                                                        <svg className="w-8 h-8 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                                        <span className="text-[10px] text-slate-500 truncate w-full px-1">{att.name}</span>
+                                {step === 4 && (
+                                    <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+                                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">Evidence & Attachments</label>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {form.attachments.map((att, idx) => (
+                                                <div key={idx} className="relative group rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 aspect-square shadow-sm">
+                                                    {att.fileType.startsWith('image/') ? (
+                                                        <img src={att.url} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                                                            <Paperclip className="w-8 h-8 text-slate-300 mb-2" />
+                                                            <span className="text-[10px] font-medium text-slate-500 truncate w-full text-center px-2">{att.name}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                        <button type="button" onClick={() => removeAttachment(idx)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-lg">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                        <a href={att.url} target="_blank" rel="noopener" className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-lg">
+                                                            <Search className="w-4 h-4" />
+                                                        </a>
                                                     </div>
+                                                </div>
+                                            ))}
+                                            <label className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all text-slate-400 hover:text-blue-500 shadow-sm">
+                                                {uploading ? <Loader2 className="w-6 h-6 animate-spin text-blue-500" /> : (
+                                                    <>
+                                                        <Plus className="w-8 h-8 mb-1" />
+                                                        <span className="text-[10px] font-black uppercase tracking-widest">Add Files</span>
+                                                    </>
                                                 )}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeAttachment(idx)}
-                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                                </button>
-                                                <a
-                                                    href={att.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="absolute bottom-1 right-1 bg-blue-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                                                </a>
-                                            </div>
-                                        ))}
-
-                                        <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all text-slate-400 hover:text-blue-500">
-                                            {uploading ? (
-                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                                            ) : (
-                                                <>
-                                                    <svg className="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                                                    <span className="text-xs font-medium">Add Files</span>
-                                                </>
-                                            )}
-                                            <input type="file" className="hidden" multiple onChange={handleFileUpload} disabled={uploading} />
-                                        </label>
+                                                <input type="file" className="hidden" multiple onChange={handleFileUpload} disabled={uploading} />
+                                            </label>
+                                        </div>
+                                        <p className="text-[10px] text-slate-400 italic text-center">Max size 200MB. Supported: Images, PDF, Docs.</p>
                                     </div>
-                                </div>
+                                )}
                             </form>
                         </div>
 
-                        <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex-shrink-0 rounded-b-2xl">
-                            <div className="flex gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    form="incident-form"
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                                >
-                                    Save Incident
-                                </button>
+                        <div className="p-6 md:p-8 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30">
+                            <div className="flex justify-between gap-4">
+                                {step > 1 ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setStep(s => s - 1)}
+                                        className="px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all flex items-center gap-2"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        Back
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="px-6 py-3 border border-slate-200 dark:border-slate-700 text-slate-500 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+
+                                {step < 4 ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setStep(s => s + 1)}
+                                        className="px-8 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2"
+                                    >
+                                        Next
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="submit"
+                                        form="incident-form"
+                                        className="px-8 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2"
+                                    >
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        Save Incident
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

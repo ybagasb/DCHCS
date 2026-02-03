@@ -21,9 +21,17 @@ export async function GET(req: Request) {
         console.log('GET /api/incidents - DB Connected')
         const { searchParams } = new URL(req.url)
         const status = searchParams.get('status')
+        const month = searchParams.get('month') // Expected: YYYY-MM
 
         const query: any = {}
         if (status) query.status = status
+
+        if (month) {
+            const [year, m] = month.split('-')
+            const startDate = new Date(parseInt(year), parseInt(m) - 1, 1)
+            const endDate = new Date(parseInt(year), parseInt(m), 1)
+            query.reportDate = { $gte: startDate, $lt: endDate }
+        }
 
         if (searchParams.get('nextId') === 'true') {
             const nextId = await generateIncidentId()

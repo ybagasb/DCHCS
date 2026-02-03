@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Printer, Calendar, User } from 'lucide-react'
 
 type ChecklistItem = {
   _id: string
@@ -23,7 +24,7 @@ type ChecklistItem = {
   noted: string
 }
 
-export default function ChecklistHistory({ refreshKey }: { refreshKey: number }) {
+export default function ChecklistHistory({ refreshKey, month }: { refreshKey: number; month: string }) {
   const [data, setData] = useState<ChecklistItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -31,7 +32,7 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
     const fetchData = async () => {
       setLoading(true)
       try {
-        const res = await fetch('/api/checklist')
+        const res = await fetch(`/api/checklist?month=${month}`)
         const json = await res.json()
         setData(json)
       } catch (error) {
@@ -41,126 +42,89 @@ export default function ChecklistHistory({ refreshKey }: { refreshKey: number })
       }
     }
     fetchData()
-  }, [refreshKey])
+  }, [refreshKey, month])
 
-  if (loading) return <div className="text-center py-4 text-slate-500">Loading history...</div>
-  if (data.length === 0) return <div className="text-center py-4 text-slate-500">No records found.</div>
+  if (loading) return (
+    <div className="py-20 flex justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+    </div>
+  )
 
+  if (data.length === 0) return (
+    <div className="py-20 text-center text-slate-500 dark:text-slate-400">
+      No checklist records found for this month.
+    </div>
+  )
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
-      <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
-        <thead className="text-xs text-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-          <tr>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">Date</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">Officer</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">PAC (T/H)</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">UPS</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">FSS</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">EMS (R1/R2)</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">Raised Floor</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">Infra</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">CCTV</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap">Notes</th>
-            <th className="px-6 py-4 font-semibold whitespace-nowrap text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((item) => (
-            <tr
-              key={item._id}
-              className="bg-white border-b dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600"
-            >
-              <td className="px-6 py-4 font-medium text-slate-900 dark:text-white whitespace-nowrap">
-                {new Date(item.tgl).toLocaleDateString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-700 dark:text-slate-300">
-                {item.piket || '-'}
-              </td>
-              <td className="px-6 py-4">
-                {item.pac.temp}°C / {item.pac.humdty}%
-                {item.pac.alarm && <div className="text-red-500 text-xs mt-1">Alarm: {item.pac.alarm}</div>}
-              </td>
-              <td className="px-6 py-4">
-                <div>1: {item.ups.ups1}</div>
-                <div>2: {item.ups.ups2}</div>
-              </td>
-              <td className="px-6 py-4">
-                <div>LCD: {item.fss.lcdPanel}</div>
-                <div>Sel: {item.fss.selenoid}</div>
-              </td>
-              <td className="px-6 py-4">
-                <div>1: {item.ems.tempRoom1}°C</div>
-                <div>2: {item.ems.tempRoom2}°C</div>
-              </td>
-              <td className="px-6 py-4">
-                {item.raisedFloor ? (
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded text-xs font-bold ${item.raisedFloor.status === 'Critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                          item.raisedFloor.status === 'Issue' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        }`}>
-                        {item.raisedFloor.status || 'OK'}
-                      </span>
-                    </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 grid grid-cols-2 gap-x-2">
-                      <span>Phys: {item.raisedFloor.physicalCondition || '-'}</span>
-                      <span>Clean: {item.raisedFloor.cleanliness || '-'}</span>
-                      <span>Air: {item.raisedFloor.airflowCooling || '-'}</span>
-                    </div>
-                    {item.raisedFloor.notes && item.raisedFloor.notes !== 'No issue found' && (
-                      <div className="text-xs italic text-slate-600 dark:text-slate-300 mt-1 border-t border-slate-100 dark:border-slate-700 pt-1">
-                        "{item.raisedFloor.notes}"
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-slate-400">-</span>
-                )}
-              </td>
-              <td className="px-6 py-4">
-                <div>Rack: {item.rackCabling.rack}</div>
-                <div>Cab: {item.rackCabling.cabling}</div>
-                <div>AC: {item.acSplitLights.acSplit}</div>
-                <div>Light: {item.acSplitLights.lights}</div>
-              </td>
-              <td className="px-6 py-4">{item.cctvDc}</td>
-              <td className="px-6 py-4 max-w-xs text-xs">
-                <div className="space-y-1">
-                  {item.noted && <div title={item.noted}>{item.noted}</div>}
-                  {!item.noted && !item.raisedFloor?.notes && <span className="text-slate-400">-</span>}
-                </div>
-              </td>
-              <td className="px-6 py-4 text-center">
-                <a
-                  href={`/dashboard/checklist/print/${item._id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 rounded-full transition-colors"
-                  title="Print Checklist"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                    <rect x="6" y="14" width="12" height="8"></rect>
-                  </svg>
-                </a>
-              </td>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase text-xs font-semibold">
+            <tr>
+              <th className="px-6 py-4 border-b dark:border-slate-600">Date</th>
+              <th className="px-6 py-4 border-b dark:border-slate-600">Officer</th>
+              <th className="px-6 py-4 border-b dark:border-slate-600">PAC (T/H)</th>
+              <th className="px-6 py-4 border-b dark:border-slate-600">UPS</th>
+              <th className="px-6 py-4 border-b dark:border-slate-600">FSS</th>
+              <th className="px-6 py-4 border-b dark:border-slate-600">EMS</th>
+              <th className="px-6 py-4 border-b dark:border-slate-600">Raised Floor</th>
+              <th className="px-6 py-4 border-b dark:border-slate-600 text-center">Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+            {data.map((item) => (
+              <tr key={item._id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-slate-400" />
+                  {new Date(item.tgl).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <User className="w-3.5 h-3.5 text-blue-500" />
+                    {item.piket?.split(',')[0] || '-'} & {item.piket?.split(',')[1] || '-'}
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="font-bold text-blue-600 dark:text-blue-400">{item.pac.temp}°C</span> / {item.pac.humdty}%
+                </td>
+                <td className="px-6 py-4 text-xs">
+                  <div className="flex flex-col">
+                    <span className={item.ups.ups1 !== 'Normal' ? 'text-red-500 font-bold' : ''}>U1: {item.ups.ups1}</span>
+                    <span className={item.ups.ups2 !== 'Normal' ? 'text-red-500 font-bold' : ''}>U2: {item.ups.ups2}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-xs">
+                  <div>LCD: {item.fss.lcdPanel}</div>
+                  <div>Sel: {item.fss.selenoid}</div>
+                </td>
+                <td className="px-6 py-4 text-xs">
+                  <div>R1: {item.ems.tempRoom1}°C</div>
+                  <div>R2: {item.ems.tempRoom2}°C</div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.raisedFloor?.status === 'Critical' ? 'bg-red-100 text-red-700' :
+                    item.raisedFloor?.status === 'Issue' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                    {item.raisedFloor?.status || 'OK'}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <a
+                    href={`/dashboard/checklist/print/${item._id}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all border border-blue-100 dark:border-blue-800"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    Print
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

@@ -4,7 +4,23 @@ import { Checklist } from '@/models/Checklist'
 
 export async function GET(req: Request) {
   await connectDB()
-  const checklist = await Checklist.find().sort({ tgl: -1 })
+  const { searchParams } = new URL(req.url)
+  const monthStr = searchParams.get('month') // Format: YYYY-MM
+
+  let query = {}
+  if (monthStr) {
+    const [year, month] = monthStr.split('-').map(Number)
+    const startDate = new Date(Date.UTC(year, month - 1, 1))
+    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999))
+    query = {
+      tgl: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    }
+  }
+
+  const checklist = await Checklist.find(query).sort({ tgl: -1 })
   return NextResponse.json(checklist)
 }
 
@@ -13,7 +29,7 @@ export async function POST(req: Request) {
   const body = await req.json()
   console.log('--- API DEBUG ---')
   console.log('Received Body:', JSON.stringify(body, null, 2))
-  
+
   // Debug: Check if Schema has raisedFloor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const schemaPaths = (Checklist.schema as any).paths
@@ -23,6 +39,6 @@ export async function POST(req: Request) {
   const checklist = await Checklist.create(body)
   console.log('Created Data:', JSON.stringify(checklist, null, 2))
   console.log('-----------------')
-  
+
   return NextResponse.json(checklist, { status: 201 })
 }

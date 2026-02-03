@@ -41,8 +41,8 @@ export default async function HomePage(props: {
                 className="w-6 h-6 object-contain"
               />
             </div>
-            <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
-              DCHCS
+            <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent uppercase tracking-tight font-black">
+              OMNIOPSSEC
             </h1>
           </div>
 

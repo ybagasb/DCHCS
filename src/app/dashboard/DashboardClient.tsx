@@ -42,10 +42,10 @@ export default function DashboardClient() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white">DashboardLinks</h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">Manage your links efficiently.</p>
+            <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase tracking-tighter">OMNIOPSSEC</h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">Centralized health and operations management.</p>
           </div>
-          
+
           {/* Search Bar */}
           <div className="relative w-full md:w-96">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

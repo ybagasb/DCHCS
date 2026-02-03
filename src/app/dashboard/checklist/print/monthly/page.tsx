@@ -153,9 +153,13 @@ export default async function MonthlyPrintPage(props: {
                   <td className="p-1">{item.acSplitLights?.lights === 'On' ? 'OK' : 'X'}</td>
                   <td className="p-1">{item.cctvDc === 'Online' ? 'OK' : 'X'}</td>
 
-                  <td className="p-1 text-left text-[9px] max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis px-2">
-                    {item.noted ? item.noted : ''}
-                    {item.raisedFloor?.notes && item.raisedFloor.notes !== 'No issue found' ? ` ${item.raisedFloor.notes}` : ''}
+                  <td className="p-1 text-left text-[9px] max-w-[200px] px-2">
+                    <div className="flex flex-col gap-0.5">
+                      {item.noted && <span>{item.noted}</span>}
+                      {item.raisedFloor?.notes && item.raisedFloor.notes !== 'No issue found' && (
+                        <span className="italic text-gray-600">RF: {item.raisedFloor.notes}</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
