@@ -62,7 +62,7 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                         <div className="w-20 h-20 flex items-center justify-center">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                                src="https://www.brantas-abipraya.co.id/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png"
+                                src="http://10.10.55.60/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png"
                                 alt="Logo Brantas Abipraya"
                                 className="w-full h-full object-contain"
                             />

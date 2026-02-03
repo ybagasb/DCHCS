@@ -36,7 +36,7 @@ export default async function HomePage(props: {
           <div className="flex items-center gap-1.5 md:gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-yellow-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/20">
               <img
-                src="https://www.brantas-abipraya.co.id/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png"
+                src="http://10.10.55.60/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png"
                 alt="Logo Brantas Abipraya"
                 className="w-6 h-6 object-contain"
               />

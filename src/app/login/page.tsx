@@ -37,7 +37,7 @@ export default function LoginPage() {
         <div className="px-8 pt-8 pb-6 text-center">
           <div className="w-25 h-25 mx-auto bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
             <img
-              src="https://www.brantas-abipraya.co.id/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png"
+              src="http://10.10.55.60/sites/default/files/LOGO%20ABIPRAYA%20%281%29_1.png"
               alt="Logo Brantas Abipraya"
               className="w-20 h-20 object-contain"
             />
