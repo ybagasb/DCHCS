@@ -7,25 +7,29 @@ const RcsSchema = new Schema(
         cpu: {
             capacity: { type: Number, default: 0 },
             free: { type: Number, default: 0 },
-            used: { type: Number, default: 0 }
+            used: { type: Number, default: 0 },
+            unit: { type: String, default: 'GHz' }
         },
         memory: {
             capacity: { type: Number, default: 0 },
             free: { type: Number, default: 0 },
-            used: { type: Number, default: 0 }
+            used: { type: Number, default: 0 },
+            unit: { type: String, default: 'GB' }
         },
         storage: {
             universal: {
                 capacity: { type: Number, default: 0 },
                 free: { type: Number, default: 0 },
-                used: { type: Number, default: 0 }
+                used: { type: Number, default: 0 },
+                unit: { type: String, default: 'TB' }
             },
             datastores: [
                 {
                     name: { type: String, required: true },
                     capacity: { type: Number, default: 0 },
                     free: { type: Number, default: 0 },
-                    used: { type: Number, default: 0 }
+                    used: { type: Number, default: 0 },
+                    unit: { type: String, default: 'GB' }
                 }
             ]
         },

@@ -57,97 +57,164 @@ export default async function RcsMonthlyPrintPage(props: {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="border border-black overflow-hidden">
-                <table className="w-full text-[9px] text-center border-collapse">
-                    <thead>
-                        <tr className="bg-gray-100 border-b border-black">
-                            <th className="border-r border-black p-1 bg-gray-200" rowSpan={2}>Tgl</th>
-                            <th className="border-r border-black p-1 bg-gray-200" rowSpan={2}>Petugas</th>
-                            <th className="border-r border-black p-1 bg-gray-200 font-bold" colSpan={3}>CPU (GHz)</th>
-                            <th className="border-r border-black p-1 bg-gray-200 font-bold" colSpan={3}>Memory (GB)</th>
-                            <th className="border-r border-black p-1 bg-gray-200 font-bold" colSpan={3}>Storage Universal (TB)</th>
-                            {datastores.map((ds: any) => (
-                                <th key={ds._id} className="border-r border-black p-1 bg-gray-200 font-bold" colSpan={3}>{ds.name} (GB)</th>
-                            ))}
-                            <th className="p-1 bg-gray-200" rowSpan={2}>Notes</th>
-                        </tr>
-                        <tr className="bg-gray-100 border-b border-black">
-                            <th className="border-r border-black p-1">Cap</th><th className="border-r border-black p-1">Free</th><th className="border-r border-black p-1">Used</th>
-                            <th className="border-r border-black p-1">Cap</th><th className="border-r border-black p-1">Free</th><th className="border-r border-black p-1">Used</th>
-                            <th className="border-r border-black p-1">Cap</th><th className="border-r border-black p-1">Free</th><th className="border-r border-black p-1">Used</th>
-                            {datastores.map((ds: any) => (
-                                <React.Fragment key={ds._id}>
-                                    <th className="border-r border-black p-1">Cap</th>
-                                    <th className="border-r border-black p-1">Free</th>
-                                    <th className="border-r border-black p-1">Used</th>
-                                </React.Fragment>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-black">
-                        {rawData.length === 0 ? (
-                            <tr><td colSpan={11 + (datastores.length * 3)} className="text-center p-4">No data found</td></tr>
-                        ) : (
-                            rawData.map((item: any) => (
-                                <tr key={item._id} className="divide-x divide-black border-b border-black last:border-b-0">
-                                    <td className="p-1">{new Date(item.tgl).getDate()}</td>
-                                    <td className="p-1 whitespace-nowrap overflow-hidden max-w-[80px] text-left px-1">
-                                        {item.piket?.split(',')[0]} & {item.piket?.split(',')[1]}
-                                    </td>
+            {/* Helper for rendering values with inline units */}
+            {(() => {
+                const renderMetric = (val: any, unit: string, isBig = false) => (
+                    <div className="whitespace-nowrap flex items-baseline justify-center gap-1">
+                        <span className={isBig ? "font-bold text-[10px]" : "font-semibold"}>{val || '-'}</span>
+                        <span className="text-[6px] opacity-50 uppercase font-normal">{unit}</span>
+                    </div>
+                );
 
-                                    {/* CPU */}
-                                    <td className="p-1">{item.cpu.capacity}</td>
-                                    <td className="p-1">{item.cpu.free}</td>
-                                    <td className="p-1 font-bold">{item.cpu.used}</td>
+                return (
+                    <div className="space-y-10">
+                        {/* SECTION 1: COMPUTE RESOURCES */}
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center border-b-2 border-black pb-1">
+                                <h2 className="font-extrabold text-[10px] uppercase tracking-[0.2em]">01. Compute Resources (CPU & Memory)</h2>
+                                <span className="text-[8px] italic opacity-60">Monthly Infrastructure Health Check</span>
+                            </div>
+                            <div className="border border-black overflow-hidden shadow-sm">
+                                <table className="w-full text-center border-collapse table-fixed">
+                                    <thead>
+                                        <tr className="bg-gray-100 border-b border-black text-[8px] font-bold">
+                                            <th className="border-r border-black p-2 bg-gray-200 w-[45px]">Tgl</th>
+                                            <th className="border-r border-black p-2 bg-gray-200 w-[100px]">Petugas</th>
+                                            <th className="border-r border-black p-2 bg-gray-100" colSpan={3}>CPU Performance</th>
+                                            <th className="border-r border-black p-2 bg-gray-100" colSpan={3}>RAM Utilization</th>
+                                            <th className="p-2 bg-gray-200 w-[200px]">Catatan / Notes</th>
+                                        </tr>
+                                        <tr className="bg-gray-50 border-b border-black text-[7px] uppercase tracking-tighter">
+                                            <th className="border-r border-black"></th>
+                                            <th className="border-r border-black"></th>
+                                            <th className="border-r border-black p-1">Cap</th>
+                                            <th className="border-r border-black p-1">Free</th>
+                                            <th className="border-r border-black p-1 font-bold">Used</th>
+                                            <th className="border-r border-black p-1">Cap</th>
+                                            <th className="border-r border-black p-1">Free</th>
+                                            <th className="border-r border-black p-1 font-bold">Used</th>
+                                            <th className=""></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-300 text-[8px]">
+                                        {rawData.length === 0 ? (
+                                            <tr><td colSpan={9} className="py-10 text-gray-400">Data not yet recorded for this period.</td></tr>
+                                        ) : (
+                                            rawData.map((item: any, idx) => (
+                                                <tr key={item._id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-blue-50/20 transition-colors`}>
+                                                    <td className="p-2 font-bold text-[10px] border-r border-black">{new Date(item.tgl).getDate()}</td>
+                                                    <td className="p-2 text-left border-r border-black">
+                                                        <div className="font-medium leading-tight">
+                                                            {item.piket?.split(',')[0]} &
+                                                            {item.piket?.split(',')[1]}
+                                                        </div>
+                                                    </td>
+                                                    <td className="border-r border-gray-200">{renderMetric(item.cpu.capacity, item.cpu.unit || 'GHz')}</td>
+                                                    <td className="border-r border-gray-200">{renderMetric(item.cpu.free, item.cpu.unit || 'GHz')}</td>
+                                                    <td className="border-r border-black bg-blue-50/30">{renderMetric(item.cpu.used, item.cpu.unit || 'GHz', true)}</td>
+                                                    <td className="border-r border-gray-200">{renderMetric(item.memory.capacity, item.memory.unit || 'GB')}</td>
+                                                    <td className="border-r border-gray-200">{renderMetric(item.memory.free, item.memory.unit || 'GB')}</td>
+                                                    <td className="border-r border-black bg-indigo-50/30">{renderMetric(item.memory.used, item.memory.unit || 'GB', true)}</td>
+                                                    <td className="p-2 text-left text-[7px] italic text-gray-600 truncate">{item.notes || '-'}</td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-                                    {/* Memory */}
-                                    <td className="p-1">{item.memory.capacity}</td>
-                                    <td className="p-1">{item.memory.free}</td>
-                                    <td className="p-1 font-bold">{item.memory.used}</td>
+                        {/* SECTION 2: STORAGE RESOURCES */}
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center border-b-2 border-black pb-1">
+                                <h2 className="font-extrabold text-[10px] uppercase tracking-[0.2em]">02. Storage Resources (Universal & Datastores)</h2>
+                                <span className="text-[8px] italic opacity-60 text-red-600 font-bold">* Check Free Space Thresholds</span>
+                            </div>
+                            <div className="border border-black overflow-hidden shadow-sm">
+                                <table className="w-full text-center border-collapse table-fixed">
+                                    <thead>
+                                        <tr className="bg-gray-100 border-b border-black text-[8px] font-bold">
+                                            <th className="border-r border-black p-2 bg-gray-200 w-[45px]" rowSpan={2}>Tgl</th>
+                                            <th className="border-r border-black p-2 bg-gray-200 w-[80px]" rowSpan={2}>Petugas</th>
+                                            <th className="border-r border-black p-2 bg-gray-100" colSpan={3}>Universal Storage Cluster</th>
+                                            <th className="p-2 bg-gray-100 w-[450px]" rowSpan={2}>Individual Datastores Performance Grid</th>
+                                        </tr>
+                                        <tr className="bg-gray-50 border-b border-black text-[7px] uppercase tracking-tighter">
+                                            <th className="border-r border-black p-1">Cap</th>
+                                            <th className="border-r border-black p-1 text-red-600">Free</th>
+                                            <th className="border-r border-black p-1 font-bold">Used</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-black text-[8px]">
+                                        {rawData.length === 0 ? (
+                                            <tr><td colSpan={6} className="py-10 text-gray-400">Data not yet recorded for this period.</td></tr>
+                                        ) : (
+                                            rawData.map((item: any, idx) => {
+                                                return (
+                                                    <tr key={item._id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                                                        <td className="p-2 font-black text-[10px] border-r border-black bg-gray-50/50">{new Date(item.tgl).getDate()}</td>
+                                                        <td className="p-2 text-left border-r border-black align-top font-medium">
+                                                            {item.piket?.split(',')[0]} & {item.piket?.split(',')[1]}
+                                                        </td>
+                                                        <td className="border-r border-gray-200">{renderMetric(item.storage.universal.capacity, item.storage.universal.unit || 'TB')}</td>
+                                                        <td className="border-r border-gray-200 text-red-600 font-bold">{renderMetric(item.storage.universal.free, item.storage.universal.unit || 'TB')}</td>
+                                                        <td className="border-r border-black bg-emerald-50/30">{renderMetric(item.storage.universal.used, item.storage.universal.unit || 'TB', true)}</td>
 
-                                    {/* Storage Univ */}
-                                    <td className="p-1">{item.storage.universal.capacity}</td>
-                                    <td className="p-1">{item.storage.universal.free}</td>
-                                    <td className="p-1 font-bold">{item.storage.universal.used}</td>
-
-                                    {/* Datastores */}
-                                    {datastores.map((ds: any) => {
-                                        const dsData = item.storage.datastores.find((d: any) => d.name === ds.name)
-                                        return (
-                                            <React.Fragment key={ds._id}>
-                                                <td className="p-1">{dsData?.capacity || '-'}</td>
-                                                <td className="p-1">{dsData?.free || '-'}</td>
-                                                <td className="p-1 font-bold">{dsData?.used || '-'}</td>
-                                            </React.Fragment>
-                                        )
-                                    })}
-
-                                    <td className="p-1 text-left text-[8px] max-w-[150px] truncate px-1">
-                                        {item.notes || '-'}
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                                                        {/* Datastore Grid Cell - Increased columns and reduced padding */}
+                                                        <td className="p-1.5 align-top text-left bg-white/50">
+                                                            <div className="grid grid-cols-4 gap-y-1.5 gap-x-3">
+                                                                {datastores.map((ds: any) => {
+                                                                    const dsData = item.storage.datastores.find((d: any) => d.name === ds.name);
+                                                                    const unit = dsData?.unit || 'GB';
+                                                                    return (
+                                                                        <div key={ds._id} className="flex flex-col border-b border-gray-100 pb-0.5">
+                                                                            <span className="text-[6px] font-bold uppercase text-blue-600 truncate">{ds.name}</span>
+                                                                            <div className="flex justify-between items-center text-[7px] leading-none">
+                                                                                <span className="opacity-40">U/C:</span>
+                                                                                <span className="font-bold">{dsData?.used || '0'}/{dsData?.capacity || '0'}<span className="ml-0.5 text-[5px] uppercase opacity-40">{unit}</span></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* Legend */}
-            <div className="mt-2 text-[8px] flex gap-4">
-                <span className="font-bold">Keterangan:</span>
-                <span>Cap = Capacity, Free = Tersedia, Used = Digunakan</span>
+            <div className="mt-4 flex justify-between items-center text-[7px] border-t border-gray-200 pt-2 px-1">
+                <div className="flex gap-4 opacity-70 italic font-medium">
+                    <span><strong className="not-italic">CAP</strong> = Capacity (Kapasitas Total)</span>
+                    <span><strong className="not-italic">FREE</strong> = Tersedia (Kapasitas Kosong)</span>
+                    <span><strong className="not-italic">USED</strong> = Digunakan (Pemakaian)</span> |
+                    <span><strong className="not-italic">U</strong> = Used (Pemakaian)</span>
+                    <span><strong className="not-italic">C</strong> = Capacity (Kapasitas Total)</span>
+                </div>
+                <div className="text-gray-400 font-bold tracking-widest uppercase">
+                    RCS Automated Report Module v2.1
+                </div>
             </div>
 
             {/* Footer / Signatures */}
-            <div className="mt-16 flex justify-end gap-20 pr-10">
-                <div className="text-center">
-                    <p className="mb-20">Mengetahui,</p>
-                    <p className="font-bold underline">VP Inovasi & Trasf. Digital</p>
+            <div className="mt-12 flex justify-end gap-16 pr-10">
+                <div className="text-center min-w-[150px]">
+                    <p className="mb-14 text-[9px] font-medium tracking-tighter">Mengetahui,</p>
+                    <div className="border-b border-black w-full mb-1"></div>
+                    <p className="font-extrabold uppercase text-[9px]">VP IT & Trasf. Digital</p>
                 </div>
-                <div className="text-center">
-                    <p className="mb-20">Dibuat Oleh,</p>
-                    <p className="font-bold underline">Staf IT Infrastructure</p>
+                <div className="text-center min-w-[150px]">
+                    <p className="mb-14 text-[9px] font-medium tracking-tighter">Dibuat Oleh,</p>
+                    <div className="border-b border-black w-full mb-1"></div>
+                    <p className="font-extrabold uppercase text-[9px]">Staf IT Infrastructure</p>
                 </div>
             </div>
         </div>

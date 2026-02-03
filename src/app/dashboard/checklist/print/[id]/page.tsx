@@ -44,6 +44,13 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
         return { text: '-', color: '' };
     }
 
+    const renderMetric = (val: any, unit: string) => (
+        <div className="flex items-baseline justify-center gap-1 font-mono">
+            <span className="font-bold">{val || '-'}</span>
+            <span className="text-[7px] opacity-40 uppercase font-normal">{unit}</span>
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-white text-black p-8 font-serif print:p-0">
             {/* Print Button - Hidden on Print */}
@@ -115,16 +122,16 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                             <tr>
                                 <td className="border border-black px-3 py-1 font-bold" rowSpan={3}>PAC System</td>
                                 <td className="border border-black px-3 py-1">Temperature</td>
-                                <td className="border border-black px-3 py-1 text-center">{item.pac?.temp || '-'} °C</td>
-                                <td className="border border-black px-3 py-1 text-center text-slate-500">19-24 °C</td>
+                                <td className="border border-black px-3 py-1 text-center">{renderMetric(item.pac?.temp, '°C')}</td>
+                                <td className="border border-black px-3 py-1 text-center text-slate-500 text-[10px]">19-24 <span className="text-[7px]">°C</span></td>
                                 <td className={`border border-black px-3 py-1 text-center ${evaluateStatus(item.pac?.temp, 'range', [19, 24]).color}`}>
                                     {evaluateStatus(item.pac?.temp, 'range', [19, 24]).text}
                                 </td>
                             </tr>
                             <tr>
                                 <td className="border border-black px-3 py-1">Humidity</td>
-                                <td className="border border-black px-3 py-1 text-center">{item.pac?.humdty || '-'} %</td>
-                                <td className="border border-black px-3 py-1 text-center text-slate-500">40-60 %</td>
+                                <td className="border border-black px-3 py-1 text-center">{renderMetric(item.pac?.humdty, '%')}</td>
+                                <td className="border border-black px-3 py-1 text-center text-slate-500 text-[10px]">40-60 <span className="text-[7px]">%</span></td>
                                 <td className={`border border-black px-3 py-1 text-center ${evaluateStatus(item.pac?.humdty, 'range', [40, 60]).color}`}>
                                     {evaluateStatus(item.pac?.humdty, 'range', [40, 60]).text}
                                 </td>
@@ -182,16 +189,16 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                             <tr>
                                 <td className="border border-black px-3 py-1 font-bold" rowSpan={2}>Env. Monitoring (EMS)</td>
                                 <td className="border border-black px-3 py-1">Temp Room 1</td>
-                                <td className="border border-black px-3 py-1 text-center">{item.ems?.tempRoom1 || '-'} °C</td>
-                                <td className="border border-black px-3 py-1 text-center text-slate-500">&lt; 25 °C</td>
+                                <td className="border border-black px-3 py-1 text-center">{renderMetric(item.ems?.tempRoom1, '°C')}</td>
+                                <td className="border border-black px-3 py-1 text-center text-slate-500 text-[10px]">&lt; 25 <span className="text-[7px]">°C</span></td>
                                 <td className={`border border-black px-3 py-1 text-center ${evaluateStatus(item.ems?.tempRoom1, 'lessThan', 25).color}`}>
                                     {evaluateStatus(item.ems?.tempRoom1, 'lessThan', 25).text}
                                 </td>
                             </tr>
                             <tr>
                                 <td className="border border-black px-3 py-1">Temp Room 2</td>
-                                <td className="border border-black px-3 py-1 text-center">{item.ems?.tempRoom2 || '-'} °C</td>
-                                <td className="border border-black px-3 py-1 text-center text-slate-500">&lt; 25 °C</td>
+                                <td className="border border-black px-3 py-1 text-center">{renderMetric(item.ems?.tempRoom2, '°C')}</td>
+                                <td className="border border-black px-3 py-1 text-center text-slate-500 text-[10px]">&lt; 25 <span className="text-[7px]">°C</span></td>
                                 <td className={`border border-black px-3 py-1 text-center ${evaluateStatus(item.ems?.tempRoom2, 'lessThan', 25).color}`}>
                                     {evaluateStatus(item.ems?.tempRoom2, 'lessThan', 25).text}
                                 </td>
@@ -280,6 +287,86 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                     </table>
                 </div>
 
+                {/* Physical Storage Health (HDD Amber Check) */}
+                <div className="mt-6 border-2 border-black">
+                    <div className="bg-slate-200 border-b-2 border-black px-3 py-1 flex justify-between items-center">
+                        <h3 className="font-bold uppercase text-[11px]">Physical Storage Health (HDD Amber Check)</h3>
+                        <div className="flex gap-4 text-[9px] font-bold">
+                            <span className="flex items-center gap-1"><div className="w-3 h-3 bg-white border border-black/20"></div> Normal</span>
+                            <span className="flex items-center gap-1"><div className="w-3 h-3 bg-amber-400 border border-black/20 flex items-center justify-center text-[8px]">!</div> Amber / Error</span>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 divide-x divide-black">
+                        {/* Rack 3 */}
+                        <div className="p-2 space-y-2">
+                            <h4 className="font-black text-[10px] border-b border-black/10 pb-1">RACK 3 - MSA 2050</h4>
+                            <div className="grid grid-cols-8 gap-1">
+                                {item.storage?.rack3?.msa2050?.map((isAmber: boolean, i: number) => (
+                                    <div key={i} className={`h-4 border flex items-center justify-center text-[7px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
+                                        {isAmber ? '!' : i + 1}
+                                    </div>
+                                ))}
+                            </div>
+                            {item.storage?.rack3?.notes && <div className="mt-2 text-[9px] italic bg-slate-50 p-1 border border-black/5">Note: {item.storage.rack3.notes}</div>}
+                        </div>
+
+                        {/* Rack 4 */}
+                        <div className="p-2 space-y-3">
+                            <h4 className="font-black text-[10px] border-b border-black/10 pb-1">RACK 4 - MSA 2040 & ENCL</h4>
+                            <div className="space-y-2">
+                                <div className="text-[8px] font-bold opacity-50 uppercase">MSA 2040 (24 HDDs)</div>
+                                <div className="grid grid-cols-8 gap-1">
+                                    {item.storage?.rack4?.msa2040?.map((isAmber: boolean, i: number) => (
+                                        <div key={i} className={`h-4 border flex items-center justify-center text-[7px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
+                                            {isAmber ? '!' : i + 1}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    <div>
+                                        <div className="text-[7px] font-bold opacity-50 uppercase mb-1">D3710 (1)</div>
+                                        <div className="grid grid-cols-4 gap-1">
+                                            {item.storage?.rack4?.d3710_1?.map((isAmber: boolean, i: number) => (
+                                                <div key={i} className={`h-3.5 border flex items-center justify-center text-[6px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
+                                                    {isAmber ? '!' : i + 1}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-[7px] font-bold opacity-50 uppercase mb-1">D3710 (2)</div>
+                                        <div className="grid grid-cols-4 gap-1">
+                                            {item.storage?.rack4?.d3710_2?.map((isAmber: boolean, i: number) => (
+                                                <div key={i} className={`h-3.5 border flex items-center justify-center text-[6px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
+                                                    {isAmber ? '!' : i + 1}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {item.storage?.rack4?.notes && <div className="mt-2 text-[9px] italic bg-slate-50 p-1 border border-black/5">Note: {item.storage.rack4.notes}</div>}
+                        </div>
+
+                        {/* Rack 5 */}
+                        <div className="p-2 space-y-2">
+                            <h4 className="font-black text-[10px] border-b border-black/10 pb-1">RACK 5 - DL380 GEN10</h4>
+                            <div className="grid grid-cols-8 gap-1">
+                                {item.storage?.rack5?.dl380?.map((isAmber: boolean, i: number) => (
+                                    <div key={i} className={`h-4 border flex items-center justify-center text-[7px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
+                                        {isAmber ? '!' : i + 1}
+                                    </div>
+                                ))}
+                            </div>
+                            {item.storage?.rack5?.notes && <div className="mt-2 text-[9px] italic bg-slate-50 p-1 border border-black/5">Note: {item.storage.rack5.notes}</div>}
+                        </div>
+                    </div>
+                    {/* Static Notes for Witness */}
+                    <div className="bg-slate-50 border-t border-black p-2 text-[8px] italic text-slate-600">
+                        * Centang/Tanda (!) menunjukkan HDD dalam kondisi Amber (Bermasalah). Petugas wajib segera melaporkan jika ditemukan anomali fisik pada storage.
+                    </div>
+                </div>
+
                 {/* Notes */}
                 <div className="mt-6 border border-black p-4 min-h-[100px]">
                     <h3 className="font-bold underline mb-2">Catatan Tambahan:</h3>
@@ -289,12 +376,12 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                     </p>
                 </div>
 
-                {/* Signatures */}
+                {/* Signatures
                 <div className="mt-5 flex justify-end">
                     <div className="mr-12 text-center">
                         <p className="mb-20">Mengetahui,</p>
                         <div className="border-b border-black w-40 mx-auto"></div>
-                        <p className="mt-1 font-bold">VP Inovasi & Transformasi Digital</p>
+                        <p className="mt-1 font-bold">VP IT & Transformasi Digital</p>
                     </div>
                     <div className="text-center">
                         <p className="mb-13">Dibuat Oleh,</p>
@@ -303,7 +390,7 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                         </p>
                         <p className="mt-1 font-bold">Staf IT Infra</p>
                     </div>
-                </div>
+                </div> */}
 
             </div>
         </div>

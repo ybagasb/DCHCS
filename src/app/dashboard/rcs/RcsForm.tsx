@@ -15,27 +15,40 @@ interface StepProps {
     errors: any
 }
 
-const InputField = ({ label, value, onChange, error, type = 'text', readOnly = false, suffix }: any) => (
+const InputField = ({ label, value, onChange, error, type = 'text', readOnly = false, suffix, onUnitChange, unitValue, unitOptions }: any) => (
     <div className="space-y-1.5">
         <label className={`text-sm font-semibold ${error ? 'text-red-500' : 'text-slate-600 dark:text-slate-300'}`}>
             {label}
         </label>
-        <div className="relative">
-            <input
-                type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                readOnly={readOnly}
-                className={`w-full ${suffix ? 'pr-14' : 'px-4'} py-2.5 bg-slate-50 dark:bg-slate-900 border rounded-xl focus:outline-none focus:ring-2 transition-all ${readOnly ? 'opacity-70 cursor-not-allowed' : ''
-                    } ${error
-                        ? 'border-red-500 focus:ring-red-100 dark:focus:ring-red-900/20'
-                        : 'border-slate-200 dark:border-slate-700 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900 dark:text-slate-100'
-                    }`}
-            />
-            {suffix && (
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shadow-sm pointer-events-none">
-                    {suffix}
-                </span>
+        <div className="flex gap-2">
+            <div className="relative flex-1">
+                <input
+                    type={type}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    readOnly={readOnly}
+                    className={`w-full ${suffix && !onUnitChange ? 'pr-14' : 'px-4'} py-2.5 bg-slate-50 dark:bg-slate-900 border rounded-xl focus:outline-none focus:ring-2 transition-all ${readOnly ? 'opacity-70 cursor-not-allowed' : ''
+                        } ${error
+                            ? 'border-red-500 focus:ring-red-100 dark:focus:ring-red-900/20'
+                            : 'border-slate-200 dark:border-slate-700 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900 dark:text-slate-100'
+                        }`}
+                />
+                {suffix && !onUnitChange && (
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shadow-sm pointer-events-none">
+                        {suffix}
+                    </span>
+                )}
+            </div>
+            {onUnitChange && (
+                <select
+                    value={unitValue}
+                    onChange={(e) => onUnitChange(e.target.value)}
+                    className="w-20 px-2 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                >
+                    {unitOptions.map((opt: string) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                </select>
             )}
         </div>
         {error && <p className="text-xs text-red-500">This field is required</p>}
@@ -52,10 +65,10 @@ export default function RcsForm({ onClose, onSuccess }: { onClose: () => void; o
     const [formData, setFormData] = useState({
         tgl: new Date().toISOString().split('T')[0],
         piket: '',
-        cpu: { capacity: '', free: '', used: '' },
-        memory: { capacity: '', free: '', used: '' },
+        cpu: { capacity: '', free: '', used: '', unit: 'GHz' },
+        memory: { capacity: '', free: '', used: '', unit: 'GB' },
         storage: {
-            universal: { capacity: '', free: '', used: '' },
+            universal: { capacity: '', free: '', used: '', unit: 'TB' },
             datastores: [] as any[]
         },
         notes: ''
@@ -72,7 +85,7 @@ export default function RcsForm({ onClose, onSuccess }: { onClose: () => void; o
                         ...prev,
                         storage: {
                             ...prev.storage,
-                            datastores: ds.map((d: any) => ({ name: d.name, capacity: '', free: '', used: '' }))
+                            datastores: ds.map((d: any) => ({ name: d.name, capacity: '', free: '', used: '', unit: 'GB' }))
                         }
                     }))
                 }
@@ -240,7 +253,10 @@ export default function RcsForm({ onClose, onSuccess }: { onClose: () => void; o
                                 <InputField
                                     label="Capacity"
                                     type="number"
-                                    suffix="TB"
+                                    suffix="Unit"
+                                    onUnitChange={(u: string) => setFormData({ ...formData, storage: { ...formData.storage, universal: { ...formData.storage.universal, unit: u } } })}
+                                    unitValue={formData.storage.universal.unit}
+                                    unitOptions={['TB', 'GB', 'MB']}
                                     value={formData.storage.universal.capacity}
                                     onChange={(v: string) => setFormData({ ...formData, storage: { ...formData.storage, universal: { ...formData.storage.universal, capacity: v } } })}
                                     error={errors['storage.universal.capacity']}
@@ -248,16 +264,31 @@ export default function RcsForm({ onClose, onSuccess }: { onClose: () => void; o
                                 <InputField
                                     label="Free"
                                     type="number"
-                                    suffix="TB"
+                                    readOnly={true}
+                                    suffix={formData.storage.universal.unit}
                                     value={formData.storage.universal.free}
                                     onChange={(v: string) => setFormData({ ...formData, storage: { ...formData.storage, universal: { ...formData.storage.universal, free: v } } })}
                                 />
                                 <InputField
                                     label="Used"
                                     type="number"
-                                    suffix="TB"
+                                    suffix={formData.storage.universal.unit}
                                     value={formData.storage.universal.used}
-                                    onChange={(v: string) => setFormData({ ...formData, storage: { ...formData.storage, universal: { ...formData.storage.universal, used: v } } })}
+                                    onChange={(v: string) => {
+                                        const cap = parseFloat(formData.storage.universal.capacity) || 0;
+                                        const used = parseFloat(v) || 0;
+                                        setFormData({
+                                            ...formData,
+                                            storage: {
+                                                ...formData.storage,
+                                                universal: {
+                                                    ...formData.storage.universal,
+                                                    used: v,
+                                                    free: (cap - used).toString()
+                                                }
+                                            }
+                                        })
+                                    }}
                                     error={errors['storage.universal.used']}
                                 />
                             </div>
@@ -272,7 +303,14 @@ export default function RcsForm({ onClose, onSuccess }: { onClose: () => void; o
                                         <InputField
                                             label="Capacity"
                                             type="number"
-                                            suffix="GB"
+                                            suffix="Unit"
+                                            onUnitChange={(u: string) => {
+                                                const newDs = [...formData.storage.datastores]
+                                                newDs[idx].unit = u
+                                                setFormData({ ...formData, storage: { ...formData.storage, datastores: newDs } })
+                                            }}
+                                            unitValue={ds.unit}
+                                            unitOptions={['TB', 'GB', 'MB']}
                                             value={ds.capacity}
                                             onChange={(v: string) => {
                                                 const newDs = [...formData.storage.datastores]
@@ -283,7 +321,8 @@ export default function RcsForm({ onClose, onSuccess }: { onClose: () => void; o
                                         <InputField
                                             label="Free"
                                             type="number"
-                                            suffix="GB"
+                                            readOnly={true}
+                                            suffix={ds.unit}
                                             value={ds.free}
                                             onChange={(v: string) => {
                                                 const newDs = [...formData.storage.datastores]
@@ -294,11 +333,14 @@ export default function RcsForm({ onClose, onSuccess }: { onClose: () => void; o
                                         <InputField
                                             label="Used"
                                             type="number"
-                                            suffix="GB"
+                                            suffix={ds.unit}
                                             value={ds.used}
                                             onChange={(v: string) => {
                                                 const newDs = [...formData.storage.datastores]
+                                                const cap = parseFloat(newDs[idx].capacity) || 0;
+                                                const used = parseFloat(v) || 0;
                                                 newDs[idx].used = v
+                                                newDs[idx].free = (cap - used).toString()
                                                 setFormData({ ...formData, storage: { ...formData.storage, datastores: newDs } })
                                             }}
                                         />

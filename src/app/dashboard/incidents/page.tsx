@@ -97,6 +97,10 @@ export default function IncidentsPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (step < 5) {
+            setStep(s => s + 1)
+            return
+        }
         try {
             const url = editingId ? `/api/incidents/${editingId}` : '/api/incidents'
             const method = editingId ? 'PUT' : 'POST'
@@ -118,6 +122,7 @@ export default function IncidentsPage() {
                 setIsModalOpen(false)
                 setEditingId(null)
                 setForm(initialForm)
+                setStep(1)
                 fetchIncidents()
             } else {
                 alert('Failed to save incident')
@@ -129,6 +134,7 @@ export default function IncidentsPage() {
 
     const handleEdit = (incident: Incident) => {
         setEditingId(incident._id)
+        setStep(1)
         setForm({
             reportDate: incident.reportDate ? toLocalISOString(new Date(incident.reportDate)) : '',
             reporter: incident.reporter,
@@ -418,7 +424,7 @@ export default function IncidentsPage() {
                                     {editingId ? 'Edit Incident' : 'New Incident Report'}
                                 </h3>
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full transition-colors">
+                            <button onClick={() => { setIsModalOpen(false); setStep(1); }} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full transition-colors">
                                 <X className="w-6 h-6 text-slate-400" />
                             </button>
                         </div>
@@ -426,7 +432,7 @@ export default function IncidentsPage() {
                         {/* Progress Bar (Wizard Style) */}
                         <div className="px-8 pt-6 pb-2">
                             <div className="flex justify-between mb-2">
-                                {[1, 2, 3, 4].map((s) => (
+                                {[1, 2, 3, 4, 5].map((s) => (
                                     <div key={s} className="flex flex-col items-center gap-1">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step >= s ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-110' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}`}>
                                             {s}
@@ -435,7 +441,7 @@ export default function IncidentsPage() {
                                 ))}
                             </div>
                             <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-600 transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }}></div>
+                                <div className="h-full bg-blue-600 transition-all duration-300" style={{ width: `${(step / 5) * 100}%` }}></div>
                             </div>
                         </div>
 
@@ -675,6 +681,64 @@ export default function IncidentsPage() {
                                         <p className="text-[10px] text-slate-400 italic text-center">Max size 200MB. Supported: Images, PDF, Docs.</p>
                                     </div>
                                 )}
+
+                                {step === 5 && (
+                                    <div className="space-y-6 animate-in slide-in-from-right-4 duration-300 pb-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="h-8 w-1 bg-blue-600 rounded-full"></div>
+                                            <h4 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Preview Detail Insiden</h4>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-4">
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Reporter & Unit</p>
+                                                    <p className="text-sm font-bold text-slate-800 dark:text-white capitalize">{form.reporter}</p>
+                                                    <p className="text-xs text-slate-500">{form.unit}</p>
+                                                </div>
+
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Waktu & Lokasi</p>
+                                                    <p className="text-sm font-bold text-slate-800 dark:text-white">{new Date(form.reportDate).toLocaleString()}</p>
+                                                    <p className="text-xs text-slate-500">{form.area} - {form.location}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status & Kategori</p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${form.category === 'High' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{form.category}</span>
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-slate-200 text-slate-700">{form.status}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">PIC Terkait</p>
+                                                    <p className="text-sm font-bold text-slate-800 dark:text-white">{form.pic || '-'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Deskripsi Masalah</p>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{form.description}"</p>
+                                        </div>
+
+                                        {form.attachments.length > 0 && (
+                                            <div>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Lampiran Dokumen ({form.attachments.length})</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {form.attachments.map((att, i) => (
+                                                        <div key={i} className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
+                                                            <Paperclip className="w-3 h-3 text-blue-500" />
+                                                            <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 truncate max-w-[120px]">{att.name}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </form>
                         </div>
 
@@ -692,14 +756,14 @@ export default function IncidentsPage() {
                                 ) : (
                                     <button
                                         type="button"
-                                        onClick={() => setIsModalOpen(false)}
+                                        onClick={() => { setIsModalOpen(false); setStep(1); }}
                                         className="px-6 py-3 border border-slate-200 dark:border-slate-700 text-slate-500 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all"
                                     >
                                         Cancel
                                     </button>
                                 )}
 
-                                {step < 4 ? (
+                                {step < 5 ? (
                                     <button
                                         type="button"
                                         onClick={() => setStep(s => s + 1)}
@@ -710,9 +774,9 @@ export default function IncidentsPage() {
                                     </button>
                                 ) : (
                                     <button
-                                        type="submit"
-                                        form="incident-form"
-                                        className="px-8 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2"
+                                        type="button"
+                                        onClick={(e) => handleSubmit(e as any)}
+                                        className="px-8 py-3 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
                                     >
                                         <CheckCircle2 className="w-4 h-4" />
                                         Save Incident

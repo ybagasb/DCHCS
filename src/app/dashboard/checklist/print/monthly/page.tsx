@@ -51,6 +51,24 @@ export default async function MonthlyPrintPage(props: {
     return { text: '-', color: '' };
   }
 
+  const countAmbers = (storage: any) => {
+    if (!storage) return 0;
+    let count = 0;
+    if (storage.rack3?.msa2050) count += storage.rack3.msa2050.filter((x: boolean) => x).length;
+    if (storage.rack4?.msa2040) count += storage.rack4.msa2040.filter((x: boolean) => x).length;
+    if (storage.rack4?.d3710_1) count += storage.rack4.d3710_1.filter((x: boolean) => x).length;
+    if (storage.rack4?.d3710_2) count += storage.rack4.d3710_2.filter((x: boolean) => x).length;
+    if (storage.rack5?.dl380) count += storage.rack5.dl380.filter((x: boolean) => x).length;
+    return count;
+  }
+
+  const renderMetric = (val: any, unit: string) => (
+    <div className="flex items-baseline justify-center gap-0.5">
+      <span className="font-bold">{val || '-'}</span>
+      <span className="text-[6px] opacity-40 uppercase font-normal">{unit}</span>
+    </div>
+  );
+
   const monthName = new Date(year, month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })
 
   return (
@@ -89,7 +107,7 @@ export default async function MonthlyPrintPage(props: {
               <th className="border-r border-black p-1 bg-gray-200" colSpan={2}>UPS</th>
               <th className="border-r border-black p-1 bg-gray-200" colSpan={2}>EMS (&lt;25°C)</th>
               <th className="border-r border-black p-1 bg-gray-200" colSpan={1}>Floor</th>
-              <th className="border-r border-black p-1 bg-gray-200" colSpan={5}>Infrastructure</th>
+              <th className="border-r border-black p-1 bg-gray-200" colSpan={6}>Infrastructure</th>
               <th className="p-1 bg-gray-200" rowSpan={2}>Notes</th>
             </tr>
             <tr className="bg-gray-100 border-b border-black">
@@ -106,11 +124,12 @@ export default async function MonthlyPrintPage(props: {
               <th className="border-r border-black p-1">AC</th>
               <th className="border-r border-black p-1">Light</th>
               <th className="border-r border-black p-1">CCTV</th>
+              <th className="border-r border-black p-1">HDD</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-black">
             {rawData.length === 0 ? (
-              <tr><td colSpan={16} className="text-center p-4">No data found</td></tr>
+              <tr><td colSpan={17} className="text-center p-4">No data found</td></tr>
             ) : (
               rawData.map((item: any) => (
                 <tr key={item._id} className="divide-x divide-black border-b border-black last:border-b-0">
@@ -121,10 +140,10 @@ export default async function MonthlyPrintPage(props: {
 
                   {/* PAC */}
                   <td className={`p-1 ${evaluateStatus(item.pac?.temp, 'range', [19, 24]).color}`}>
-                    {item.pac?.temp}
+                    {renderMetric(item.pac?.temp, '°C')}
                   </td>
                   <td className={`p-1 ${evaluateStatus(item.pac?.humdty, 'range', [40, 60]).color}`}>
-                    {item.pac?.humdty}
+                    {renderMetric(item.pac?.humdty, '%')}
                   </td>
                   <td className={`p-1 font-bold ${item.pac?.alarm !== 'Normal' ? 'text-red-600' : ''}`}>
                     {item.pac?.alarm === 'Normal' ? 'OK' : '!'}
@@ -136,10 +155,10 @@ export default async function MonthlyPrintPage(props: {
 
                   {/* EMS */}
                   <td className={`p-1 ${evaluateStatus(item.ems?.tempRoom1, 'lessThan', 25).color}`}>
-                    {item.ems?.tempRoom1}
+                    {renderMetric(item.ems?.tempRoom1, '°C')}
                   </td>
                   <td className={`p-1 ${evaluateStatus(item.ems?.tempRoom2, 'lessThan', 25).color}`}>
-                    {item.ems?.tempRoom2}
+                    {renderMetric(item.ems?.tempRoom2, '°C')}
                   </td>
 
                   {/* Raised Floor - Stat */}
@@ -152,6 +171,9 @@ export default async function MonthlyPrintPage(props: {
                   <td className="p-1">{item.acSplitLights?.acSplit === 'On' ? 'OK' : 'X'}</td>
                   <td className="p-1">{item.acSplitLights?.lights === 'On' ? 'OK' : 'X'}</td>
                   <td className="p-1">{item.cctvDc === 'Online' ? 'OK' : 'X'}</td>
+                  <td className={`p-1 font-bold ${countAmbers(item.storage) > 0 ? 'text-amber-600' : ''}`}>
+                    {countAmbers(item.storage) > 0 ? `${countAmbers(item.storage)}!` : 'OK'}
+                  </td>
 
                   <td className="p-1 text-left text-[9px] max-w-[200px] px-2">
                     <div className="flex flex-col gap-0.5">
@@ -159,6 +181,9 @@ export default async function MonthlyPrintPage(props: {
                       {item.raisedFloor?.notes && item.raisedFloor.notes !== 'No issue found' && (
                         <span className="italic text-gray-600">RF: {item.raisedFloor.notes}</span>
                       )}
+                      {item.storage?.rack3?.notes && <span className="italic text-gray-600">Str R3: {item.storage.rack3.notes}</span>}
+                      {item.storage?.rack4?.notes && <span className="italic text-gray-600">Str R4: {item.storage.rack4.notes}</span>}
+                      {item.storage?.rack5?.notes && <span className="italic text-gray-600">Str R5: {item.storage.rack5.notes}</span>}
                     </div>
                   </td>
                 </tr>
@@ -172,7 +197,7 @@ export default async function MonthlyPrintPage(props: {
       <div className="mt-2 text-[9px] flex gap-4">
         <span className="font-bold">Legend:</span>
         <span><span className="font-bold">OK</span> = Normal/Good/Clean & Locked/Tidy/On/Online</span>
-        <span><span className="font-bold text-red-600">!</span> = Alarm/Warning</span>
+        <span><span className="font-bold text-red-600">!</span> = Alarm/Warning/Amber Detected</span>
         <span><span className="font-bold text-red-600">X</span> = Dirty/Messy/Off/Problem</span>
       </div>
 
@@ -181,7 +206,7 @@ export default async function MonthlyPrintPage(props: {
       <div className="mt-16 flex justify-end gap-20 pr-10">
         <div className="text-center">
           <p className="mb-20">Mengetahui,</p>
-          <p className="font-bold underline">VP Inovasi & Trasf. Digital</p>
+          <p className="font-bold underline">VP IT & Trasf. Digital</p>
         </div>
         <div className="text-center">
           <p className="mb-20">Dibuat Oleh,</p>

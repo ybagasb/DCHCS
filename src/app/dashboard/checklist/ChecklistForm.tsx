@@ -104,7 +104,7 @@ export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () =
   const [loadingPic, setLoadingPic] = useState(false)
   const [step, setStep] = useState(1)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
-  const totalSteps = 8
+  const totalSteps = 9
   const [isTransitioning, setIsTransitioning] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -118,11 +118,16 @@ export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () =
       physicalCondition: '',
       cleanliness: '',
       airflowCooling: '',
-      notes: 'No issue found',
+      notes: '',
       status: ''
     },
     rackCabling: { rack: '', cabling: '' },
     acSplitLights: { acSplit: '', lights: '' },
+    storage: {
+      rack3: { msa2050: Array(24).fill(false), notes: '' },
+      rack4: { msa2040: Array(24).fill(false), d3710_1: Array(20).fill(false), d3710_2: Array(20).fill(false), notes: '' },
+      rack5: { dl380: Array(24).fill(false), notes: '' }
+    },
     cctvDc: '',
     noted: '',
   })
@@ -311,6 +316,119 @@ export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () =
           </InputGroup>
         )
       case 8:
+        const handleHddToggle = (rack: string, controller: string, index: number) => {
+          setFormData(prev => ({
+            ...prev,
+            storage: {
+              ...(prev.storage as any),
+              [rack]: {
+                ...(prev.storage as any)[rack],
+                [controller]: (prev.storage as any)[rack][controller].map((val: boolean, i: number) => i === index ? !val : val)
+              }
+            }
+          }))
+        }
+
+        const handleRackNoteChange = (rack: string, val: string) => {
+          setFormData(prev => ({
+            ...prev,
+            storage: {
+              ...(prev.storage as any),
+              [rack]: {
+                ...(prev.storage as any)[rack],
+                notes: val
+              }
+            }
+          }))
+        }
+
+        const HddGrid = ({ label, count, rack, controller, vertical = false }: { label: string; count: number; rack: string; controller: string; vertical?: boolean }) => (
+          <div className="space-y-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+            <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-50 pb-2 flex justify-between">
+              {label}
+              <span className="text-blue-500">{count} HDDS</span>
+            </h4>
+            <div className={`grid ${vertical ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-6 sm:grid-cols-8 md:grid-cols-12'} gap-2`}>
+              {Array.from({ length: count }).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleHddToggle(rack, controller, i)}
+                  className={`group relative flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${(formData.storage as any)[rack][controller][i]
+                    ? 'bg-amber-100 border-amber-400 text-amber-900 shadow-lg shadow-amber-200 ring-2 ring-amber-500'
+                    : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300'
+                    }`}
+                >
+                  <span className={`text-[8px] font-bold ${(formData.storage as any)[rack][controller][i] ? 'text-amber-800' : 'text-slate-400'}`}>{i + 1}</span>
+                  <div className={`w-3 h-1 mt-1 rounded-full ${(formData.storage as any)[rack][controller][i] ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'}`} />
+
+                  {/* Tooltip */}
+                  {(formData.storage as any)[rack][controller][i] && (
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-amber-600 text-white text-[8px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+                      AMBER DETECTED
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+            <textarea
+              placeholder={`Catatan untuk ${label}...`}
+              rows={1}
+              value={(formData.storage as any)[rack].notes}
+              onChange={(e) => handleRackNoteChange(rack, e.target.value)}
+              className="w-full mt-2 px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 italic"
+            />
+          </div>
+        )
+
+        return (
+          <div className="space-y-6">
+            <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-400 p-4 rounded-r-xl">
+              <h3 className="text-amber-800 dark:text-amber-200 font-bold text-sm mb-2 flex items-center gap-2">
+                ⚠️ STORAGE HEALTH MONITORING (HDD AMBER)
+              </h3>
+              <ul className="text-[11px] text-amber-700 dark:text-amber-300 space-y-1 font-medium">
+                <li>• Centang tombol jika status HDD adalah <strong>AMBER / ERROR</strong>.</li>
+                <li>• Catat <strong>Size (Kapasitas)</strong> dan <strong>Tipe</strong> HDD yang bermasalah pada kolom catatan.</li>
+                <li>• Jika ditemukan HDD Amber, segera lapor ke bagian terkait!</li>
+              </ul>
+            </div>
+
+            <div className="space-y-6 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+              {/* RACK 3 */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px]">R3</span>
+                  RACK 03 - STORAGE MSA 2050
+                </h3>
+                <HddGrid label="MSA 2050 Controller" count={24} rack="rack3" controller="msa2050" />
+              </div>
+
+              {/* RACK 4 */}
+              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px]">R4</span>
+                  RACK 04 - STORAGE CLUSTER
+                </h3>
+                <HddGrid label="MSA 2040 Controller" count={24} rack="rack4" controller="msa2040" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <HddGrid label="Enclosure D3710 (1)" count={20} rack="rack4" controller="d3710_1" vertical />
+                  <HddGrid label="Enclosure D3710 (2)" count={20} rack="rack4" controller="d3710_2" vertical />
+                </div>
+              </div>
+
+              {/* RACK 5 */}
+              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800 pb-10">
+                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[10px]">R5</span>
+                  RACK 05 - BACKUP STORAGE
+                </h3>
+                <HddGrid label="DL380 PROLIANT GEN10" count={24} rack="rack5" controller="dl380" />
+              </div>
+            </div>
+          </div>
+        )
+      case 9:
         return (
           <InputGroup label="Additional Information">
             <textarea

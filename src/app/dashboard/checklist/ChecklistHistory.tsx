@@ -20,6 +20,11 @@ type ChecklistItem = {
   }
   rackCabling: { rack: string; cabling: string }
   acSplitLights: { acSplit: string; lights: string }
+  storage?: {
+    rack3: { msa2050: boolean[]; notes: string }
+    rack4: { msa2040: boolean[]; d3710_1: boolean[]; d3710_2: boolean[]; notes: string }
+    rack5: { dl380: boolean[]; notes: string }
+  }
   cctvDc: string
   noted: string
 }
@@ -44,6 +49,17 @@ export default function ChecklistHistory({ refreshKey, month }: { refreshKey: nu
     fetchData()
   }, [refreshKey, month])
 
+  const countAmbers = (storage: any) => {
+    if (!storage) return 0;
+    let count = 0;
+    if (storage.rack3?.msa2050) count += storage.rack3.msa2050.filter((x: boolean) => x).length;
+    if (storage.rack4?.msa2040) count += storage.rack4.msa2040.filter((x: boolean) => x).length;
+    if (storage.rack4?.d3710_1) count += storage.rack4.d3710_1.filter((x: boolean) => x).length;
+    if (storage.rack4?.d3710_2) count += storage.rack4.d3710_2.filter((x: boolean) => x).length;
+    if (storage.rack5?.dl380) count += storage.rack5.dl380.filter((x: boolean) => x).length;
+    return count;
+  }
+
   if (loading) return (
     <div className="py-20 flex justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -51,7 +67,7 @@ export default function ChecklistHistory({ refreshKey, month }: { refreshKey: nu
   )
 
   if (data.length === 0) return (
-    <div className="py-20 text-center text-slate-500 dark:text-slate-400">
+    <div className="bg-white dark:bg-slate-800 py-20 text-center text-slate-500 dark:text-slate-400 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
       No checklist records found for this month.
     </div>
   )
@@ -69,6 +85,7 @@ export default function ChecklistHistory({ refreshKey, month }: { refreshKey: nu
               <th className="px-6 py-4 border-b dark:border-slate-600">FSS</th>
               <th className="px-6 py-4 border-b dark:border-slate-600">EMS</th>
               <th className="px-6 py-4 border-b dark:border-slate-600">Raised Floor</th>
+              <th className="px-6 py-4 border-b dark:border-slate-600">Storage</th>
               <th className="px-6 py-4 border-b dark:border-slate-600 text-center">Action</th>
             </tr>
           </thead>
@@ -109,6 +126,17 @@ export default function ChecklistHistory({ refreshKey, month }: { refreshKey: nu
                     }`}>
                     {item.raisedFloor?.status || 'OK'}
                   </span>
+                </td>
+                <td className="px-6 py-4">
+                  {countAmbers(item.storage) > 0 ? (
+                    <span className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-200 dark:border-amber-800">
+                      {countAmbers(item.storage)} AMBER
+                    </span>
+                  ) : (
+                    <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded text-[10px] font-bold border border-green-200 dark:border-green-800">
+                      NORMAL
+                    </span>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-center">
                   <a

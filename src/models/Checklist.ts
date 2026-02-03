@@ -36,6 +36,22 @@ const ChecklistSchema = new Schema(
       acSplit: { type: String, default: '' },
       lights: { type: String, default: '' },
     },
+    storage: {
+      rack3: {
+        msa2050: { type: [Boolean], default: Array(24).fill(false) },
+        notes: { type: String, default: '' }
+      },
+      rack4: {
+        msa2040: { type: [Boolean], default: Array(24).fill(false) },
+        d3710_1: { type: [Boolean], default: Array(20).fill(false) },
+        d3710_2: { type: [Boolean], default: Array(20).fill(false) },
+        notes: { type: String, default: '' }
+      },
+      rack5: {
+        dl380: { type: [Boolean], default: Array(24).fill(false) },
+        notes: { type: String, default: '' }
+      }
+    },
     cctvDc: { type: String, default: '' },
     noted: { type: String, default: '' },
   },
