@@ -135,7 +135,7 @@ export default async function MonthlyPrintPage(props: {
                 <tr key={item._id} className="divide-x divide-black border-b border-black last:border-b-0">
                   <td className="p-1">{new Date(item.tgl).getDate()}</td>
                   <td className="p-1 whitespace-nowrap overflow-hidden max-w-[100px] text-left px-2" title={item.piket}>
-                    {item.piket?.split(',')[0]}
+                    {item.piket?.split(',')[0]} & {item.piket?.split(',')[1]}
                   </td>
 
                   {/* PAC */}
@@ -177,13 +177,16 @@ export default async function MonthlyPrintPage(props: {
 
                   <td className="p-1 text-left text-[9px] max-w-[200px] px-2">
                     <div className="flex flex-col gap-0.5">
-                      {item.noted && <span>{item.noted}</span>}
+                      {item.noted && <span className="mb-0.5">{item.noted}</span>}
                       {item.raisedFloor?.notes && item.raisedFloor.notes !== 'No issue found' && (
-                        <span className="italic text-gray-600">RF: {item.raisedFloor.notes}</span>
+                        <span className="italic text-gray-600"><span className="font-bold not-italic text-black">[Floor]:</span> {item.raisedFloor.notes}</span>
                       )}
-                      {item.storage?.rack3?.notes && <span className="italic text-gray-600">Str R3: {item.storage.rack3.notes}</span>}
-                      {item.storage?.rack4?.notes && <span className="italic text-gray-600">Str R4: {item.storage.rack4.notes}</span>}
-                      {item.storage?.rack5?.notes && <span className="italic text-gray-600">Str R5: {item.storage.rack5.notes}</span>}
+                      {item.storage?.rack3?.notes && <span className="italic text-gray-600"><span className="font-bold not-italic text-black">[Rack 3 MSA 2050]:</span> {item.storage.rack3.notes}</span>}
+                      {item.storage?.rack4?.note_msa2040 && <span className="italic text-gray-600"><span className="font-bold not-italic text-black">[R4 MSA 2040]:</span> {item.storage.rack4.note_msa2040}</span>}
+                      {item.storage?.rack4?.note_d3710_1 && <span className="italic text-gray-600"><span className="font-bold not-italic text-black">[R4 Encl 1]:</span> {item.storage.rack4.note_d3710_1}</span>}
+                      {item.storage?.rack4?.note_d3710_2 && <span className="italic text-gray-600"><span className="font-bold not-italic text-black">[R4 Encl 2]:</span> {item.storage.rack4.note_d3710_2}</span>}
+                      {item.storage?.rack4?.notes && <span className="italic text-gray-600"><span className="font-bold not-italic text-black">[Rack 4]:</span> {item.storage.rack4.notes}</span>}
+                      {item.storage?.rack5?.notes && <span className="italic text-gray-600"><span className="font-bold not-italic text-black">[Rack 5]:</span> {item.storage.rack5.notes}</span>}
                     </div>
                   </td>
                 </tr>
@@ -194,11 +197,38 @@ export default async function MonthlyPrintPage(props: {
       </div>
 
       {/* Legend */}
-      <div className="mt-2 text-[9px] flex gap-4">
-        <span className="font-bold">Legend:</span>
-        <span><span className="font-bold">OK</span> = Normal/Good/Clean & Locked/Tidy/On/Online</span>
-        <span><span className="font-bold text-red-600">!</span> = Alarm/Warning/Amber Detected</span>
-        <span><span className="font-bold text-red-600">X</span> = Dirty/Messy/Off/Problem</span>
+      <div className="mt-4 border border-black p-2 bg-slate-50">
+        <p className="font-bold text-[10px] mb-2 border-b border-black/10 pb-1">Keterangan / Legend:</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-[9px]">
+          <div className="flex items-center gap-2">
+            <span className="font-bold w-6 h-4 flex items-center justify-center bg-white border border-black rounded-[2px] shadow-sm">OK</span>
+            <span>: Kondisi Normal / Baik / Online</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold w-6 h-4 flex items-center justify-center bg-white border border-black rounded-[2px] shadow-sm text-red-600">!</span>
+            <span>: Alarm / Warning / HDD Amber</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold w-6 h-4 flex items-center justify-center bg-white border border-black rounded-[2px] shadow-sm">X</span>
+            <span>: Abnormal / Off / Kotor / Rusak</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold w-6 h-4 flex items-center justify-center bg-white border border-black rounded-[2px] shadow-sm text-red-600">Val</span>
+            <span>: Nilai Melewati Batas Parameter</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold w-6 h-4 flex items-center justify-center bg-white border border-black rounded-[2px] shadow-sm">B</span>
+            <span>: UPS Mode Backup</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold w-6 h-4 flex items-center justify-center bg-white border border-black rounded-[2px] shadow-sm">F</span>
+            <span>: UPS Fault / Error</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold w-6 h-4 flex items-center justify-center bg-white border border-black rounded-[2px] shadow-sm">O</span>
+            <span>: UPS Off / Mati</span>
+          </div>
+        </div>
       </div>
 
       {/* Footer / Signatures - Simple 2 Col */}

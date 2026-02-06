@@ -99,6 +99,65 @@ const SelectField = ({
   </div>
 )
 
+const HddGrid = ({
+  label,
+  count,
+  data,
+  vertical = false,
+  noteValue,
+  onToggle,
+  onNoteChange
+}: {
+  label: string;
+  count: number;
+  data: boolean[];
+  vertical?: boolean;
+  noteValue: string;
+  onToggle: (idx: number) => void;
+  onNoteChange: (val: string) => void;
+}) => (
+  <div className="space-y-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-600">
+    <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-50 dark:border-slate-700/50 pb-2 flex justify-between items-center">
+      {label}
+      <span className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full text-[9px] font-black">{count} HDDS</span>
+    </h4>
+    <div className={`grid ${vertical ? 'grid-flow-col grid-rows-5 gap-1.5' : 'grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2'}`}>
+      {Array.from({ length: count }).map((_, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => onToggle(i)}
+          className={`group relative flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${data[i]
+            ? 'bg-amber-100 border-amber-400 text-amber-900 shadow-lg shadow-amber-200 dark:shadow-amber-900/20 ring-1 ring-amber-500'
+            : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700 text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+            }`}
+        >
+          <span className={`text-[8px] font-bold ${data[i] ? 'text-amber-800' : 'text-slate-400 dark:text-slate-500'}`}>{i + 1}</span>
+          <div className={`w-3 h-1 mt-1 rounded-full ${data[i] ? 'bg-amber-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600'}`} />
+
+          {data[i] && (
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-amber-600 text-white text-[8px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none shadow-xl">
+              AMBER DETECTED
+            </div>
+          )}
+        </button>
+      ))}
+    </div>
+    <div className="relative mt-2 group">
+      <textarea
+        placeholder={`Catatan untuk ${label}...`}
+        rows={1}
+        value={noteValue}
+        onChange={(e) => onNoteChange(e.target.value)}
+        className="w-full px-3 py-2 text-[11px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all italic font-medium text-slate-600 dark:text-slate-300 placeholder-slate-400 pr-8"
+      />
+      <div className="absolute right-3 top-2.5 opacity-30 group-focus-within:opacity-100 group-focus-within:text-amber-500 transition-all pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+      </div>
+    </div>
+  </div>
+)
+
 export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () => void; onClose?: () => void }) {
   const [loading, setLoading] = useState(false)
   const [loadingPic, setLoadingPic] = useState(false)
@@ -125,12 +184,21 @@ export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () =
     acSplitLights: { acSplit: '', lights: '' },
     storage: {
       rack3: { msa2050: Array(24).fill(false), notes: '' },
-      rack4: { msa2040: Array(24).fill(false), d3710_1: Array(20).fill(false), d3710_2: Array(20).fill(false), notes: '' },
+      rack4: {
+        msa2040: Array(24).fill(false),
+        note_msa2040: '',
+        d3710_1: Array(25).fill(false),
+        note_d3710_1: '',
+        d3710_2: Array(25).fill(false),
+        note_d3710_2: '',
+        notes: ''
+      },
       rack5: { dl380: Array(24).fill(false), notes: '' }
     },
     cctvDc: '',
     noted: '',
   })
+
 
   useEffect(() => {
     const fetchPic = async () => {
@@ -329,57 +397,18 @@ export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () =
           }))
         }
 
-        const handleRackNoteChange = (rack: string, val: string) => {
+        const handleRackNoteChange = (rack: string, key: string, val: string) => {
           setFormData(prev => ({
             ...prev,
             storage: {
               ...(prev.storage as any),
               [rack]: {
                 ...(prev.storage as any)[rack],
-                notes: val
+                [key]: val
               }
             }
           }))
         }
-
-        const HddGrid = ({ label, count, rack, controller, vertical = false }: { label: string; count: number; rack: string; controller: string; vertical?: boolean }) => (
-          <div className="space-y-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-            <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-50 pb-2 flex justify-between">
-              {label}
-              <span className="text-blue-500">{count} HDDS</span>
-            </h4>
-            <div className={`grid ${vertical ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-6 sm:grid-cols-8 md:grid-cols-12'} gap-2`}>
-              {Array.from({ length: count }).map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => handleHddToggle(rack, controller, i)}
-                  className={`group relative flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${(formData.storage as any)[rack][controller][i]
-                    ? 'bg-amber-100 border-amber-400 text-amber-900 shadow-lg shadow-amber-200 ring-2 ring-amber-500'
-                    : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300'
-                    }`}
-                >
-                  <span className={`text-[8px] font-bold ${(formData.storage as any)[rack][controller][i] ? 'text-amber-800' : 'text-slate-400'}`}>{i + 1}</span>
-                  <div className={`w-3 h-1 mt-1 rounded-full ${(formData.storage as any)[rack][controller][i] ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'}`} />
-
-                  {/* Tooltip */}
-                  {(formData.storage as any)[rack][controller][i] && (
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-amber-600 text-white text-[8px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                      AMBER DETECTED
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-            <textarea
-              placeholder={`Catatan untuk ${label}...`}
-              rows={1}
-              value={(formData.storage as any)[rack].notes}
-              onChange={(e) => handleRackNoteChange(rack, e.target.value)}
-              className="w-full mt-2 px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 italic"
-            />
-          </div>
-        )
 
         return (
           <div className="space-y-6">
@@ -401,7 +430,14 @@ export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () =
                   <span className="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px]">R3</span>
                   RACK 03 - STORAGE MSA 2050
                 </h3>
-                <HddGrid label="MSA 2050 Controller" count={24} rack="rack3" controller="msa2050" />
+                <HddGrid
+                  label="MSA 2050 Controller"
+                  count={24}
+                  data={(formData.storage as any).rack3.msa2050}
+                  onToggle={(idx) => handleHddToggle('rack3', 'msa2050', idx)}
+                  noteValue={(formData.storage as any).rack3.notes}
+                  onNoteChange={(val) => handleRackNoteChange('rack3', 'notes', val)}
+                />
               </div>
 
               {/* RACK 4 */}
@@ -410,10 +446,33 @@ export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () =
                   <span className="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px]">R4</span>
                   RACK 04 - STORAGE CLUSTER
                 </h3>
-                <HddGrid label="MSA 2040 Controller" count={24} rack="rack4" controller="msa2040" />
+                <HddGrid
+                  label="MSA 2040 Controller"
+                  count={24}
+                  data={(formData.storage as any).rack4.msa2040}
+                  onToggle={(idx) => handleHddToggle('rack4', 'msa2040', idx)}
+                  noteValue={(formData.storage as any).rack4.note_msa2040}
+                  onNoteChange={(val) => handleRackNoteChange('rack4', 'note_msa2040', val)}
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <HddGrid label="Enclosure D3710 (1)" count={20} rack="rack4" controller="d3710_1" vertical />
-                  <HddGrid label="Enclosure D3710 (2)" count={20} rack="rack4" controller="d3710_2" vertical />
+                  <HddGrid
+                    label="Enclosure D3710 (1)"
+                    count={25}
+                    vertical
+                    data={(formData.storage as any).rack4.d3710_1}
+                    onToggle={(idx) => handleHddToggle('rack4', 'd3710_1', idx)}
+                    noteValue={(formData.storage as any).rack4.note_d3710_1}
+                    onNoteChange={(val) => handleRackNoteChange('rack4', 'note_d3710_1', val)}
+                  />
+                  <HddGrid
+                    label="Enclosure D3710 (2)"
+                    count={25}
+                    vertical
+                    data={(formData.storage as any).rack4.d3710_2}
+                    onToggle={(idx) => handleHddToggle('rack4', 'd3710_2', idx)}
+                    noteValue={(formData.storage as any).rack4.note_d3710_2}
+                    onNoteChange={(val) => handleRackNoteChange('rack4', 'note_d3710_2', val)}
+                  />
                 </div>
               </div>
 
@@ -423,7 +482,14 @@ export default function ChecklistForm({ onSuccess, onClose }: { onSuccess?: () =
                   <span className="w-6 h-6 rounded-full bg-slate-600 text-white flex items-center justify-center text-[10px]">R5</span>
                   RACK 05 - BACKUP STORAGE
                 </h3>
-                <HddGrid label="DL380 PROLIANT GEN10" count={24} rack="rack5" controller="dl380" />
+                <HddGrid
+                  label="DL380 PROLIANT GEN10"
+                  count={24}
+                  data={(formData.storage as any).rack5.dl380}
+                  onToggle={(idx) => handleHddToggle('rack5', 'dl380', idx)}
+                  noteValue={(formData.storage as any).rack5.notes}
+                  onNoteChange={(val) => handleRackNoteChange('rack5', 'notes', val)}
+                />
               </div>
             </div>
           </div>

@@ -307,7 +307,6 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                                     </div>
                                 ))}
                             </div>
-                            {item.storage?.rack3?.notes && <div className="mt-2 text-[9px] italic bg-slate-50 p-1 border border-black/5">Note: {item.storage.rack3.notes}</div>}
                         </div>
 
                         {/* Rack 4 */}
@@ -325,9 +324,9 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                                 <div className="grid grid-cols-2 gap-2 mt-2">
                                     <div>
                                         <div className="text-[7px] font-bold opacity-50 uppercase mb-1">D3710 (1)</div>
-                                        <div className="grid grid-cols-4 gap-1">
+                                        <div className="grid grid-flow-col grid-rows-5 gap-0.5 border border-black/5 p-0.5">
                                             {item.storage?.rack4?.d3710_1?.map((isAmber: boolean, i: number) => (
-                                                <div key={i} className={`h-3.5 border flex items-center justify-center text-[6px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
+                                                <div key={i} className={`h-3.5 border flex items-center justify-center text-[5px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
                                                     {isAmber ? '!' : i + 1}
                                                 </div>
                                             ))}
@@ -335,9 +334,9 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                                     </div>
                                     <div>
                                         <div className="text-[7px] font-bold opacity-50 uppercase mb-1">D3710 (2)</div>
-                                        <div className="grid grid-cols-4 gap-1">
+                                        <div className="grid grid-flow-col grid-rows-5 gap-0.5 border border-black/5 p-0.5">
                                             {item.storage?.rack4?.d3710_2?.map((isAmber: boolean, i: number) => (
-                                                <div key={i} className={`h-3.5 border flex items-center justify-center text-[6px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
+                                                <div key={i} className={`h-3.5 border flex items-center justify-center text-[5px] font-bold ${isAmber ? 'bg-amber-400 border-amber-600' : 'bg-slate-50 border-slate-200'}`}>
                                                     {isAmber ? '!' : i + 1}
                                                 </div>
                                             ))}
@@ -345,7 +344,6 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                                     </div>
                                 </div>
                             </div>
-                            {item.storage?.rack4?.notes && <div className="mt-2 text-[9px] italic bg-slate-50 p-1 border border-black/5">Note: {item.storage.rack4.notes}</div>}
                         </div>
 
                         {/* Rack 5 */}
@@ -358,7 +356,6 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
                                     </div>
                                 ))}
                             </div>
-                            {item.storage?.rack5?.notes && <div className="mt-2 text-[9px] italic bg-slate-50 p-1 border border-black/5">Note: {item.storage.rack5.notes}</div>}
                         </div>
                     </div>
                     {/* Static Notes for Witness */}
@@ -369,11 +366,33 @@ export default async function PrintChecklistPage(props: { params: Promise<{ id: 
 
                 {/* Notes */}
                 <div className="mt-6 border border-black p-4 min-h-[100px]">
-                    <h3 className="font-bold underline mb-2">Catatan Tambahan:</h3>
-                    <p className="whitespace-pre-wrap">
-                        {item.noted || ''}
-                        {item.raisedFloor?.notes && item.raisedFloor.notes !== 'No issue found' ? `\n\n[Raised Floor]: ${item.raisedFloor.notes}` : ''}
-                    </p>
+                    <h3 className="font-bold underline mb-2">Catatan:</h3>
+                    <div className="text-xs space-y-1">
+                        {item.noted && (
+                            <p><span className="font-bold">[General]:</span> {item.noted}</p>
+                        )}
+                        {item.raisedFloor?.notes && (
+                            <p><span className="font-bold">[Raised Floor]:</span> {item.raisedFloor.notes}</p>
+                        )}
+                        {item.storage?.rack3?.notes && (
+                            <p><span className="font-bold">[Rack 3 - MSA 2050]:</span> {item.storage.rack3.notes}</p>
+                        )}
+                        {item.storage?.rack4?.note_msa2040 && (
+                            <p><span className="font-bold">[Rack 4 - MSA 2040]:</span> {item.storage.rack4.note_msa2040}</p>
+                        )}
+                        {item.storage?.rack4?.note_d3710_1 && (
+                            <p><span className="font-bold">[Rack 4 - D3710 (1)]:</span> {item.storage.rack4.note_d3710_1}</p>
+                        )}
+                        {item.storage?.rack4?.note_d3710_2 && (
+                            <p><span className="font-bold">[Rack 4 - D3710 (2)]:</span> {item.storage.rack4.note_d3710_2}</p>
+                        )}
+                        {item.storage?.rack5?.notes && (
+                            <p><span className="font-bold">[Rack 5 - DL380]:</span> {item.storage.rack5.notes}</p>
+                        )}
+                        {!item.noted && !item.raisedFloor?.notes && !item.storage?.rack3?.notes && !item.storage?.rack4?.note_msa2040 && !item.storage?.rack4?.note_d3710_1 && !item.storage?.rack4?.note_d3710_2 && !item.storage?.rack5?.notes && (
+                            <p className="text-slate-400 italic text-[10px]">Tidak ada catatan tambahan.</p>
+                        )}
+                    </div>
                 </div>
 
                 {/* Signatures

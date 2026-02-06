@@ -43,8 +43,11 @@ const ChecklistSchema = new Schema(
       },
       rack4: {
         msa2040: { type: [Boolean], default: Array(24).fill(false) },
-        d3710_1: { type: [Boolean], default: Array(20).fill(false) },
-        d3710_2: { type: [Boolean], default: Array(20).fill(false) },
+        note_msa2040: { type: String, default: '' },
+        d3710_1: { type: [Boolean], default: Array(25).fill(false) },
+        note_d3710_1: { type: String, default: '' },
+        d3710_2: { type: [Boolean], default: Array(25).fill(false) },
+        note_d3710_2: { type: String, default: '' },
         notes: { type: String, default: '' }
       },
       rack5: {
